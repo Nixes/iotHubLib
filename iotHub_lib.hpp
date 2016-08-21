@@ -2,7 +2,6 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <EEPROM.h>
-#include <Time.h>
 
 // both these valus are currently unused
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
@@ -149,8 +148,12 @@ public:
   void Send(uint sensor_index,float sensor_value) {
       HTTPClient http;
 
+      // generate the URL for sensor
+      String url = "/api/sensors/";
+      url.concat(sensor_ids[sensor_index]);
+      url.concat("/data");
       // Make a HTTP post
-      http.begin(iothub_server,iothub_port,"/api/sensors/" + sensor_ids[sensor_index] + "/data");
+      http.begin(iothub_server,iothub_port, url);
 
       // prep the json object
       StaticJsonBuffer<50> jsonBuffer;
@@ -200,13 +203,13 @@ void RegisterSensors(char* sensor_names[]) {
 
     delay(sleep_interval); // note that delay has built in calls to yeild() :)
 
-    time_t time_wifi_starting = now();
+    unsigned long time_wifi_starting = millis();
     // re-enble wifi after sleeping
     WiFi.forceSleepWake();
 
     while (WiFi.status() != WL_CONNECTED) {};
-    
-    time_t time_wifi_started = now();
+
+    unsigned long time_wifi_started = millis();
     Serial.print("Time taken to reconnect to wifi: "); Serial.println( time_wifi_started - time_wifi_starting );
   }
 };
