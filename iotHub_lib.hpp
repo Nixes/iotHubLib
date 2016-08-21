@@ -197,19 +197,19 @@ void RegisterSensors(char* sensor_names[]) {
     ShowEeprom();
   };
 
-  void Sleep() {
+  void Tick() {
     // disable wifi while sleeping
-    WiFi.forceSleepBegin();
+    //WiFi.forceSleepBegin();
 
     delay(sleep_interval); // note that delay has built in calls to yeild() :)
 
-    unsigned long time_wifi_starting = millis();
+    //unsigned long time_wifi_starting = millis();
     // re-enble wifi after sleeping
-    WiFi.forceSleepWake();
+    //WiFi.forceSleepWake();
 
-    while (WiFi.status() != WL_CONNECTED) {};
+    //Serial.print("Wifi status: "); Serial.println(WiFi.status());
 
-    unsigned long time_wifi_started = millis();
-    Serial.print("Time taken to reconnect to wifi: "); Serial.println( time_wifi_started - time_wifi_starting );
+    //unsigned long time_wifi_started = millis();
+    //Serial.print("Time taken to reconnect to wifi: "); Serial.println( time_wifi_started - time_wifi_starting );
   }
 };
