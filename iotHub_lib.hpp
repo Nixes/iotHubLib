@@ -2,6 +2,11 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <EEPROM.h>
+#include <Time.h>
+
+// both these valus are currently unused
+#define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
+#define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
 
 template<uint array_size> class iotHubLib {
 private:
@@ -9,7 +14,7 @@ private:
   int iothub_port = 80;
 
 
-  int tick_time = 10000; // default of 10 seconds
+  uint sleep_interval = 10000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
@@ -188,4 +193,20 @@ void RegisterSensors(char* sensor_names[]) {
     }
     ShowEeprom();
   };
+
+  void Sleep() {
+    // disable wifi while sleeping
+    WiFi.forceSleepBegin();
+
+    delay(sleep_interval); // note that delay has built in calls to yeild() :)
+
+    time_t time_wifi_starting = now();
+    // re-enble wifi after sleeping
+    WiFi.forceSleepWake();
+
+    while (WiFi.status() != WL_CONNECTED) {};
+    
+    time_t time_wifi_started = now();
+    Serial.print("Time taken to reconnect to wifi: "); Serial.println( time_wifi_started - time_wifi_starting );
+  }
 };
