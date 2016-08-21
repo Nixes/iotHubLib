@@ -148,14 +148,14 @@ public:
 
   void Start() {
     Serial.begin(115200);
-    WiFi.begin();
+    WiFi.begin(); // wifi configuration is outside the scope of this lib, use whatever was last used
 
     Serial.println("Establishing Wifi Connection");
     while (WiFi.status() != WL_CONNECTED) {
       delay(1000);
       Serial.print(".");
     }
-    serial.println();
+    Serial.println();
     Serial.print("DONE - Got IP: "); Serial.println(WiFi.localIP());
 
     EEPROM.begin(512); // so we can read / write EEPROM
