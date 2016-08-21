@@ -11,7 +11,7 @@ private:
 
   int tick_time = 10000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
-  char sensor_ids[array_size][24]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long
+  char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
 
   void ClearEeprom() {
@@ -87,7 +87,7 @@ private:
     Serial.print("Wrote bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
   };
 
-  void GetIdFromJson(String json_string, char (*sensor_id)[24]) {
+  void GetIdFromJson(String json_string, char (*sensor_id)[25]) {
     StaticJsonBuffer<100> jsonBuffer;
     JsonObject& json_object = jsonBuffer.parseObject(json_string);
     const char* id = json_object["id"];
@@ -95,7 +95,7 @@ private:
     strcpy (*sensor_id,id);
   }
 
-  void RegisterSensor(char* sensor_name,char (*sensor_id)[24]) {
+  void RegisterSensor(char* sensor_name,char (*sensor_id)[25]) {
     Serial.println("Registering sensor");
     HTTPClient http;
 
