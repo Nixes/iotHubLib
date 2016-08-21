@@ -129,29 +129,55 @@ private:
     http.end();
   }
 
+  // test that saved sensors Ids are still registered
+  void CheckRegistered() {
+    HTTPClient http;
+    http.begin(iothub_server,iothub_port,"/api/sensors/");
+    http.end();
+  }
+
 public:
   // constructor cannot contain parameters?
   iotHubLib(char* server, int port) {
     iothub_server = server;
     iothub_port = port;
-    Serial.begin(115200);
-    EEPROM.begin(512); // so we can read / write EEPROM
-    LoadSensors();
   };
   // destructor
   ~iotHubLib() {
   };
 
+  void Start() {
+    Serial.begin(115200);
+    WiFi.begin();
+
+    Serial.println("Establishing Wifi Connection");
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(1000);
+      Serial.print(".");
+    }
+    serial.println();
+    Serial.print("DONE - Got IP: "); Serial.println(WiFi.localIP());
+
+    EEPROM.begin(512); // so we can read / write EEPROM
+
+    Serial.print("Using Server: "); Serial.print(iothub_server); Serial.print(" Port: "); Serial.println(iothub_port);
+
+    LoadSensors();
+  }
+
   void StartConfig() {};
 
 
   void Send(uint sensor_index,float sensor_value) {
+      Serial.print("Sensor "); Serial.print(sensor_index); Serial.print(" value "); Serial.println(sensor_value);
+
       HTTPClient http;
 
       // generate the URL for sensor
       String url = "/api/sensors/";
       url.concat(sensor_ids[sensor_index]);
       url.concat("/data");
+      Serial.print("Url: "); Serial.println(url);
       // Make a HTTP post
       http.begin(iothub_server,iothub_port, url);
 
@@ -166,11 +192,12 @@ public:
       String json_string;
       json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
       // then send the json
+
+      Serial.print("Sending Data: "); Serial.println(json_string);
       http.POST(json_string);
 
       // then print the response over Serial
-      Serial.print("Response: ");
-      Serial.println( http.getString() );
+      Serial.print("Response: "); Serial.println( http.getString() ); Serial.println();
 
       http.end();
   };
