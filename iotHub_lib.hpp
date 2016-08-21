@@ -13,7 +13,7 @@ private:
   int iothub_port = 80;
 
 
-  uint sleep_interval = 10000; // default of 10 seconds
+  uint sleep_interval = 30000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
