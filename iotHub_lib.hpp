@@ -204,18 +204,20 @@ void RegisterSensors(char* sensor_names[]) {
     ShowEeprom();
     // if first boot
     if ( CheckFirstBoot() ) {
+      Serial.println("First boot, getting fresh sensor IDs from server");
       // ClearEeprom
-      //ClearEeprom();
+      ClearEeprom();
       // register sensors
       for(uint i=0; i < array_size;i++ ) {
          RegisterSensor(sensor_names[i],&sensor_ids[i]);
       }
+      // save sensor ids to eeprom
       SaveSensors();
       // change boot status
       UpdateFirstBoot();
     } else {
       // otherwise load from eeprom
-      Serial.println("Sensor already loading from eeprom");
+      Serial.println("Not first boot, loading IDs from eeprom");
       LoadSensors();
     }
     ShowEeprom();
