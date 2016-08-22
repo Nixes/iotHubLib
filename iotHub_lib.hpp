@@ -90,7 +90,7 @@ private:
     strcpy (*sensor_id,id);
   }
 
-  void RegisterSensor(char* sensor_name,char (*sensor_id)[25]) {
+  void RegisterSensor(const char* sensor_name,char (*sensor_id)[25]) {
     Serial.println("Registering sensor");
     HTTPClient http;
 
@@ -200,7 +200,7 @@ public:
   };
 
   // this should post to /api/sensors with the requested sensor, this will then return an ID that can be used
-void RegisterSensors(char* sensor_names[]) {
+void RegisterSensors(const char* sensor_names[]) {
     ShowEeprom();
     // if first boot
     if ( CheckFirstBoot() ) {
