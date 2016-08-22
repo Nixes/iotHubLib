@@ -17,15 +17,6 @@ private:
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
-
-  void ClearEeprom() {
-    // clear eeprom
-    for (int i = 0 ; i < 256 ; i++) {
-      EEPROM.write(i, 0);
-    }
-    EEPROM.commit();
-  }
-
   bool CheckFirstBoot() {
     Serial.print("BootByte: "); Serial.println(EEPROM.read(0));
     // check first byte is set to 128, this indicates this is not the first boot
@@ -161,8 +152,14 @@ public:
     EEPROM.begin(512); // so we can read / write EEPROM
 
     Serial.print("Using Server: "); Serial.print(iothub_server); Serial.print(" Port: "); Serial.println(iothub_port);
+  }
 
-    LoadSensors();
+  void ClearEeprom() {
+    // clear eeprom
+    for (int i = 0 ; i < 256 ; i++) {
+      EEPROM.write(i, 0);
+    }
+    EEPROM.commit();
   }
 
   void StartConfig() {};
