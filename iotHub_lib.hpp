@@ -207,7 +207,7 @@ public:
         SetFirstBoot();
         // restart and re-register sensors
         Serial.println("Sensor 404'd restarting");
-        //ESP.restart();
+        ESP.restart();
       }
 
       http.end();
