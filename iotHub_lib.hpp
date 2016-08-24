@@ -35,6 +35,11 @@ private:
     EEPROM.commit();
   }
 
+  void SetFirstBoot() {
+    EEPROM.write(0,0);
+    EEPROM.commit();
+  }
+
   void ShowEeprom() {
     // first byte reserved
     Serial.println();
@@ -191,10 +196,19 @@ public:
       // then send the json
 
       Serial.print("Sending Data: "); Serial.println(json_string);
-      http.POST(json_string);
+      int http_code = http.POST(json_string);
 
       // then print the response over Serial
-      Serial.print("Response: "); Serial.println( http.getString() ); Serial.println();
+      Serial.print("Response: "); Serial.println( http.getString() );
+      Serial.print("HTTP Code: "); Serial.println(http_code);Serial.println();
+
+      if (http_code == 404) {
+        // set first boot so that sensors can be registered on next boot
+        SetFirstBoot();
+        // restart and re-register sensors
+        Serial.println("Sensor 404'd restarting");
+        //ESP.restart();
+      }
 
       http.end();
   };
