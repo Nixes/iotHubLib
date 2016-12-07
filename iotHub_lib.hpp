@@ -2,6 +2,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <EEPROM.h>
+#include <aWOT.h>
 
 // both these values are currently unused
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
@@ -10,12 +11,41 @@
 template<uint array_size> class iotHubLib {
 private:
   char* iothub_server; // the location of the server
-  int iothub_port = 80;
+  int iothub_port;
 
+  WiFiServer server(); // the server that accepts requests from the hub
+  WebApp app;
 
   uint sleep_interval = 30000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
+
+  void GetActorsHandler(Request &req, Response &res) {
+    // P macro for printing strings from program memory
+   P(index) =
+     "<html>\n"
+     "<head>\n"
+     "<title>Hello World!</title>\n"
+     "</head>\n"
+     "<body>\n"
+     "<h1>Greetings middle earth!</h1>\n"
+     "</body>\n"
+     "</html>";
+
+   res.success("text/html");
+   res.printP(index);
+  }
+
+  void RegisterRouteHandlers() {
+    app.get("/", &GetActorsHandler);
+  }
+
+  void CheckConnections() {
+    WiFiClient client = server.available();
+    if (client){
+      app.process(&client);
+    }
+  }
 
   bool CheckFirstBoot() {
     Serial.print("BootByte: "); Serial.println(EEPROM.read(0));
@@ -157,6 +187,8 @@ public:
     EEPROM.begin(512); // so we can read / write EEPROM
 
     Serial.print("Using Server: "); Serial.print(iothub_server); Serial.print(" Port: "); Serial.println(iothub_port);
+
+    RegisterRouteHandlers();
   }
 
   void ClearEeprom() {
