@@ -3,7 +3,7 @@
 #include <ESP8266HTTPClient.h>
 #include <EEPROM.h>
 
-// both these valus are currently unused
+// both these values are currently unused
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
 #define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
 
@@ -133,7 +133,7 @@ private:
   }
 
 public:
-  // constructor cannot contain parameters?
+  // constructor
   iotHubLib(char* server, int port) {
     iothub_server = server;
     iothub_port = port;
