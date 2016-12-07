@@ -20,7 +20,7 @@ private:
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
-  void GetActorsHandler(Request &req, Response &res) {
+  static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
    P(index) =
      "<html>\n"
