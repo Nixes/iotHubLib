@@ -13,7 +13,7 @@ private:
   char* iothub_server; // the location of the server
   int iothub_port;
 
-  WiFiServer server(); // the server that accepts requests from the hub
+  WiFiServer server(80); // the server that accepts requests from the hub
   WebApp app;
 
   uint sleep_interval = 30000; // default of 10 seconds
@@ -270,6 +270,7 @@ void RegisterSensors(const char* sensor_names[]) {
   };
 
   void Tick() {
+    CheckConnections();
     // disable wifi while sleeping
     //WiFi.forceSleepBegin();
 
