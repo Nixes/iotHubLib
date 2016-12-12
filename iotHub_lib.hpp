@@ -276,6 +276,11 @@ void RegisterSensors(const char* sensor_names[]) {
     ShowEeprom();
     // if first boot
     if ( CheckFirstBoot() ) {
+      if(sensor_names[0] == '\0') {
+        Serial.println("Sensor name provided to RegisterSensors empty, the sensor name must not be empty");
+        return;
+      }
+
       Serial.println("First boot, getting fresh sensor IDs from server");
       // ClearEeprom
       ClearEeprom();
