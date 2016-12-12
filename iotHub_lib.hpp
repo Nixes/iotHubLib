@@ -86,7 +86,7 @@ private:
   }
 
   // this should read sensor ID's from internal memory if available, else ask for new ids from the given server
-  void LoadSensors() {
+  void LoadIds() {
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
 
@@ -115,9 +115,11 @@ private:
   };
 
   // this should save sensor ID's to internal memory
-  void SaveSensors() {
+  void SaveIds() {
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
+
+    // save sesnor ids into eeprom
     for(int i = 0; i< number_sensor_ids;i++) {
 
       for(int j = 0; j < 24;j++) {
@@ -271,13 +273,13 @@ void RegisterSensors(const char* sensor_names[]) {
          RegisterSensor(sensor_names[i],&sensor_ids[i]);
       }
       // save sensor ids to eeprom
-      SaveSensors();
+      SaveIds();
       // change boot status
       UpdateFirstBoot();
     } else {
       // otherwise load from eeprom
       Serial.println("Not first boot, loading IDs from eeprom");
-      LoadSensors();
+      LoadIds();
     }
     ShowEeprom();
   };
