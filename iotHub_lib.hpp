@@ -101,6 +101,14 @@ private:
     }
 
     // read actor ids
+    for(int i = 0; i< number_actor_ids;i++) {
+      // read an entire 24 byte id
+      for(int j = 0; j < 24;j++) {
+          actor_ids[i][j] = (char)EEPROM.read(addr);
+          addr++;
+      }
+      Serial.print("Read from eeprom into actor_ids: "); Serial.println(sensor_ids[i]);
+    }
 
     EEPROM.commit();
     Serial.print("Read bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
