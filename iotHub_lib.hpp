@@ -296,11 +296,14 @@ void RegisterSensors(const char* sensor_names[]) {
   };
 
   void Tick() {
-    CheckConnections();
+    if (number_actor_ids > 0) {
+      CheckConnections();
+    }
     // disable wifi while sleeping
     //WiFi.forceSleepBegin();
-
-    delay(sleep_interval); // note that delay has built in calls to yeild() :)
+    else if (number_sensor_ids > 0) {
+      delay(sleep_interval); // note that delay has built in calls to yeild() :)
+    }
 
     //unsigned long time_wifi_starting = millis();
     // re-enble wifi after sleeping
