@@ -19,6 +19,7 @@ private:
   uint sleep_interval = 30000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
+  char actor_ids[number_actor_ids][25]; // array of actor ID's same format as sensors
 
   static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
@@ -88,15 +89,19 @@ private:
   void LoadSensors() {
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
-    for(int i = 0; i< number_sensor_ids;i++) {
 
+    // read sensor ids
+    for(int i = 0; i< number_sensor_ids;i++) {
+      // read an entire 24 byte id
       for(int j = 0; j < 24;j++) {
           sensor_ids[i][j] = (char)EEPROM.read(addr);
           addr++;
       }
       Serial.print("Read from eeprom into sensor_ids: "); Serial.println(sensor_ids[i]);
-
     }
+
+    // read actor ids
+
     EEPROM.commit();
     Serial.print("Read bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
   };
