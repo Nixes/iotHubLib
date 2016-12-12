@@ -1,4 +1,4 @@
-#include "iotHub_lib.h"
+#include "iotHubLib.h"
 #include "DHT.h" // using adafruit DHT lib: https://github.com/adafruit/DHT-sensor-library
 
 // to init iothublib use syntax like <sensors,actors>,

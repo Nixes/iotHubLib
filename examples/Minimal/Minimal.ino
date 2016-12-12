@@ -1,4 +1,4 @@
-#include "iotHub_lib.hpp"
+#include "iotHubLib.hpp"
 
 // to init iothublib use syntax like <sensors,actors>,
 // where sensors specifies number of sensors being used on this node
