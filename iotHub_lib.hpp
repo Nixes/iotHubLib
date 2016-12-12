@@ -8,17 +8,17 @@
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
 #define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
 
-template<uint array_size> class iotHubLib {
+template<uint number_sensor_ids,uint number_actor_ids> class iotHubLib {
 private:
   char* iothub_server; // the location of the server
   int iothub_port;
 
-  WiFiServer server{80}; // the server that accepts requests from the hub
-  WebApp app;
+  WiFiServer server{80}; // the server that accepts requests from the hub, note the () initialisation syntax in not supported in class bodies
+  WebApp app; // the class used by aWOT
 
   uint sleep_interval = 30000; // default of 10 seconds
   const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
-  char sensor_ids[array_size][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
+  char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
 
   static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
@@ -88,7 +88,7 @@ private:
   void LoadSensors() {
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
-    for(int i = 0; i< array_size;i++) {
+    for(int i = 0; i< number_sensor_ids;i++) {
 
       for(int j = 0; j < 24;j++) {
           sensor_ids[i][j] = (char)EEPROM.read(addr);
@@ -105,7 +105,7 @@ private:
   void SaveSensors() {
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
-    for(int i = 0; i< array_size;i++) {
+    for(int i = 0; i< number_sensor_ids;i++) {
 
       for(int j = 0; j < 24;j++) {
           EEPROM.write(addr, sensor_ids[i][j] );
@@ -254,7 +254,7 @@ void RegisterSensors(const char* sensor_names[]) {
       // ClearEeprom
       ClearEeprom();
       // register sensors
-      for(uint i=0; i < array_size;i++ ) {
+      for(uint i=0; i < number_sensor_ids;i++ ) {
          RegisterSensor(sensor_names[i],&sensor_ids[i]);
       }
       // save sensor ids to eeprom
