@@ -13,7 +13,7 @@ private:
   char* iothub_server; // the location of the server
   int iothub_port;
 
-  WiFiServer server(80); // the server that accepts requests from the hub
+  WiFiServer server{80}; // the server that accepts requests from the hub
   WebApp app;
 
   uint sleep_interval = 30000; // default of 10 seconds
@@ -28,7 +28,7 @@ private:
      "<title>Hello World!</title>\n"
      "</head>\n"
      "<body>\n"
-     "<h1>Greetings middle earth!</h1>\n"
+     "<h1>Test post please ignore!</h1>\n"
      "</body>\n"
      "</html>";
 
