@@ -119,7 +119,7 @@ private:
     // first byte reserved
     int addr = sensor_ids_eeprom_offset;
 
-    // save sesnor ids into eeprom
+    // save sensor ids into eeprom
     for(int i = 0; i< number_sensor_ids;i++) {
 
       for(int j = 0; j < 24;j++) {
@@ -128,6 +128,17 @@ private:
       }
 
     }
+
+    // save actor ids into eeprom
+    for(int i = 0; i< number_actor_ids;i++) {
+
+      for(int j = 0; j < 24;j++) {
+          EEPROM.write(addr, actor_ids[i][j] );
+          addr++;
+      }
+
+    }
+
     EEPROM.commit();
     Serial.print("Wrote bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
   };
