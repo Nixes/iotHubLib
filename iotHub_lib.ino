@@ -1,9 +1,11 @@
 #include "iotHub_lib.hpp"
 #include "DHT.h" // using adafruit DHT lib: https://github.com/adafruit/DHT-sensor-library
 
-// init iothublib, number in <> specifies number of sensors being used on this node
-// the two arguments are the hostname of the server and the port iothub is available on
-iotHubLib<2> iothub("linserver",3000); // note lack of http:// prefix, do not add one
+// to init iothublib use syntax like <sensors,actors>,
+// where sensors specifies number of sensors being used on this node
+// and actors specifies the number of actors being used on this node
+// the two arguments in the () are the hostname of the server and the port iothub is available on
+iotHubLib<2,0> iothub("linserver",3000); // note lack of http:// prefix, do not add one
 
 // init the temp sensors
 DHT dht_0(5, DHT22);
