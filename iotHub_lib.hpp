@@ -107,7 +107,7 @@ private:
           actor_ids[i][j] = (char)EEPROM.read(addr);
           addr++;
       }
-      Serial.print("Read from eeprom into actor_ids: "); Serial.println(sensor_ids[i]);
+      Serial.print("Read from eeprom into actor_ids: "); Serial.println(actor_ids[i]);
     }
 
     EEPROM.commit();
