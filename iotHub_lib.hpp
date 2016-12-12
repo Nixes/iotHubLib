@@ -17,7 +17,7 @@ private:
   WebApp app; // the class used by aWOT
 
   uint sleep_interval = 30000; // default of 10 seconds
-  const int sensor_ids_eeprom_offset = 1; // memory location for sensor ids start +1, skipping zero
+  const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
   char actor_ids[number_actor_ids][25]; // array of actor ID's same format as sensors
 
@@ -76,7 +76,7 @@ private:
     Serial.println();
     Serial.print("Read bytes: ");
 
-    for(int addr = 0; addr < 48 + sensor_ids_eeprom_offset;) {
+    for(int addr = 0; addr < 48 + ids_eeprom_offset;) {
       Serial.print("[");
       Serial.print( (char)EEPROM.read(addr));
       Serial.print("] ");
@@ -88,7 +88,7 @@ private:
   // this should read sensor ID's from internal memory if available, else ask for new ids from the given server
   void LoadIds() {
     // first byte reserved
-    int addr = sensor_ids_eeprom_offset;
+    int addr = ids_eeprom_offset;
 
     // read sensor ids
     for(int i = 0; i< number_sensor_ids;i++) {
@@ -111,13 +111,13 @@ private:
     }
 
     EEPROM.commit();
-    Serial.print("Read bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
+    Serial.print("Read bytes: "); Serial.println(addr-ids_eeprom_offset);
   };
 
   // this should save sensor ID's to internal memory
   void SaveIds() {
     // first byte reserved
-    int addr = sensor_ids_eeprom_offset;
+    int addr = ids_eeprom_offset;
 
     // save sensor ids into eeprom
     for(int i = 0; i< number_sensor_ids;i++) {
@@ -140,7 +140,7 @@ private:
     }
 
     EEPROM.commit();
-    Serial.print("Wrote bytes: "); Serial.println(addr-sensor_ids_eeprom_offset);
+    Serial.print("Wrote bytes: "); Serial.println(addr-ids_eeprom_offset);
   };
 
   void GetIdFromJson(String json_string, char (*sensor_id)[25]) {
