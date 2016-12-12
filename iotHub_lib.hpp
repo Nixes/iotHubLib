@@ -8,7 +8,7 @@
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
 #define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
 
-template<uint number_sensor_ids,uint number_actor_ids> class iotHubLib {
+template<const uint number_sensor_ids,const uint number_actor_ids> class iotHubLib {
 private:
   char* iothub_server; // the location of the server
   int iothub_port;
