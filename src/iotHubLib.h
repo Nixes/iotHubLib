@@ -8,6 +8,15 @@
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
 #define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
 
+struct sensor {
+  char id[25];
+  char name[100]; // sensor name limited to 99 characters
+};
+struct actor {
+  char id[25];
+  char name[100]; // actor name limited to 99 characters
+};
+
 template<const uint number_sensor_ids,const uint number_actor_ids> class iotHubLib {
 private:
   char* iothub_server; // the location of the server
@@ -19,7 +28,12 @@ private:
   uint sleep_interval = 30000; // default of 10 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
-  char actor_ids[number_actor_ids][25]; // array of actor ID's same format as sensors
+  char actor_ids[number_actor_ids][25];
+  char sensor_names[number_sensor_ids][25]; // array of sensor names
+
+  // going to replace the id arrays with custom structs instead
+  //sensor sensors[number_sensor_ids];
+  //actor actors[number_actor_ids];
 
   static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
@@ -299,6 +313,11 @@ void RegisterSensors(const char* sensor_names[]) {
     }
     ShowEeprom();
   };
+
+  // as opposed to sensor which can be registered together actors must be registered individually
+  void RegisterActor( void (*function_pointer)(int) ) {
+    function_pointer(42);
+  }
 
   void Tick() {
     if (number_actor_ids > 0) {
