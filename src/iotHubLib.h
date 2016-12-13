@@ -15,6 +15,9 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
+  int state;
+  bool state;
+  void (*on_update_callback)(int); // pointer to a function that is run when a new actor state is received
 };
 
 template<const uint number_sensor_ids,const uint number_actor_ids> class iotHubLib {
