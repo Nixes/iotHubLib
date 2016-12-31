@@ -15,10 +15,11 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
-  enum{is_int, is_float} state_type;
+  enum{is_int, is_float, is_bool} state_type;
   union {
     int istate;
     double fstate;
+    bool bstate;
   } state;
   void (*on_update_callback)(int); // pointer to a function that is run when a new actor state is received
 };
