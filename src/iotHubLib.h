@@ -21,7 +21,12 @@ struct actor {
     double fstate;
     bool bstate;
   } state;
-  void (*on_update_callback)(int); // pointer to a function that is run when a new actor state is received
+  // pointer to a function that is run when a new actor state is received, this will also vary by state_type
+  union {
+    void (*icallback)(int);
+    void (*fcallback)(double);
+    void (*bcallback)(bool);
+  } on_update;
 };
 
 template<const uint number_sensor_ids,const uint number_actor_ids> class iotHubLib {
