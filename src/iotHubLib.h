@@ -15,7 +15,7 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
-  enum{is_int, is_float} type;
+  enum{is_int, is_float} state_type;
   union {
     int istate;
     double fstate;
