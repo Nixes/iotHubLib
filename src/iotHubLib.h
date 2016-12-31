@@ -15,11 +15,10 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
-  enum{is_int, is_float, is_string} type;
+  enum{is_int, is_float} type;
   union {
     int istate;
     double fstate;
-    String sstate;
   } state;
   void (*on_update_callback)(int); // pointer to a function that is run when a new actor state is received
 };
@@ -35,12 +34,14 @@ private:
   uint sleep_interval = 30000; // default of 30 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
-  char actor_ids[number_actor_ids][25];
+  //char actor_ids[number_actor_ids][25];
   char sensor_names[number_sensor_ids][25]; // array of sensor names
+
+
 
   // going to replace the id arrays with custom structs instead
   //sensor sensors[number_sensor_ids];
-  //actor actors[number_actor_ids];
+  actor actors[number_actor_ids];
 
   static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
@@ -125,10 +126,10 @@ private:
     for(int i = 0; i< number_actor_ids;i++) {
       // read an entire 24 byte id
       for(int j = 0; j < 24;j++) {
-          actor_ids[i][j] = (char)EEPROM.read(addr);
+          actors[i].id[j] = (char)EEPROM.read(addr);
           addr++;
       }
-      Serial.print("Read from eeprom into actor_ids: "); Serial.println(actor_ids[i]);
+      Serial.print("Read from eeprom into actor_ids: "); Serial.println(actors[i].id);
     }
 
     EEPROM.commit();
@@ -154,7 +155,7 @@ private:
     for(int i = 0; i< number_actor_ids;i++) {
 
       for(int j = 0; j < 24;j++) {
-          EEPROM.write(addr, actor_ids[i][j] );
+          EEPROM.write(addr, actors[i].id[j] );
           addr++;
       }
 
