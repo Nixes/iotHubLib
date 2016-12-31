@@ -15,7 +15,7 @@ void setup() {
   iothub.Start();
 
   // add actors
-  iothub.RegisterActor(actor1_callback);
+  iothub.RegisterActor("Actor name 1",actor1_callback);
 }
 
 void loop() {

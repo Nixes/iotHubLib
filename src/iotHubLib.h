@@ -15,6 +15,7 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
+  // for good example of using these "tagged unions" go to: http://stackoverflow.com/questions/18577404/how-can-a-mixed-data-type-int-float-char-etc-be-stored-in-an-array
   enum{is_int, is_float, is_bool} state_type;
   union {
     int istate;
@@ -216,6 +217,36 @@ private:
     http.end();
   }
 
+  void BaseRegisterActor(actor *actor_ptr) {
+    Serial.println("Registering actor");
+    HTTPClient http;
+
+    // Make a HTTP post
+    http.begin(iothub_server,iothub_port,"/api/actors");
+
+    // prep the json object
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& json_obj = jsonBuffer.createObject();
+    json_obj["name"] = actor_ptr->name;
+
+    http.addHeader("Content-Type","application/json"); // important! JSON conversion in nodejs requires this
+
+    // add the json to a string
+    String json_string;
+    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
+    // then send the json
+    http.POST(json_string);
+
+    // then print the response over Serial
+    Serial.print("Response ID: ");
+    GetIdFromJson(http.getString(),*&actor_ptr->id);
+
+    Serial.print(*actor_ptr->id); Serial.println("///end");
+    //Serial.println( sensor_id );
+
+    http.end();
+  }
+
 public:
   // constructor
   iotHubLib(char* server, int port) {
@@ -328,9 +359,12 @@ void RegisterSensors(const char* sensor_names[]) {
     ShowEeprom();
   };
 
-  // as opposed to sensor which can be registered together actors must be registered individually
-  void RegisterActor( void (*function_pointer)(int) ) {
-    function_pointer(42);
+  void RegisterActor(const char* actor_name[100] ,void (*function_pointer)(int)) {
+    actor new_actor;
+    new_actor.name = actor_name;
+    new_actor.state_type = is_int;
+    new_actor.on_update.icallback = function_pointer;
+    BaseRegisterActor(new_actor);
   }
 
   void Tick() {
