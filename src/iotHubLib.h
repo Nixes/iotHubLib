@@ -15,8 +15,12 @@ struct sensor {
 struct actor {
   char id[25];
   char name[100]; // actor name limited to 99 characters
-  int state;
-  bool state;
+  enum{is_int, is_float, is_string} type;
+  union {
+    int istate;
+    double fstate;
+    String sstate;
+  } state;
   void (*on_update_callback)(int); // pointer to a function that is run when a new actor state is received
 };
 
@@ -28,7 +32,7 @@ private:
   WiFiServer server{80}; // the server that accepts requests from the hub, note the () initialisation syntax in not supported in class bodies
   WebApp app; // the class used by aWOT
 
-  uint sleep_interval = 30000; // default of 10 seconds
+  uint sleep_interval = 30000; // default of 30 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
   char actor_ids[number_actor_ids][25];
