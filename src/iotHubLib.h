@@ -188,6 +188,11 @@ private:
       Serial.println("Sensor being registered had a name length over that set by max_node_name_length");
       return;
     }
+    // check that we don't already have too many sensors
+    if (last_sensor_added_index > number_sensor_ids) {
+      Serial.println("Sensor being registered was more than the number specified in initialisation.");
+      return;
+    }
 
     Serial.println("Registering sensor");
     HTTPClient http;
@@ -260,6 +265,8 @@ public:
   iotHubLib(char* server, int port) {
     iothub_server = server;
     iothub_port = port;
+    last_actor_added_index = 0;
+    last_sensor_added_index = 0;
   };
   // destructor
   ~iotHubLib() {
@@ -369,8 +376,14 @@ void RegisterSensors(const char* sensor_names[]) {
 
   void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
     // do some validation
+    // check actor name not too long
     if (strlen(actor_name) > max_node_name_length) {
       Serial.println("Actor being registered had a name length over that set by max_node_name_length");
+      return;
+    }
+    // check that we don't already have too many actors
+    if (last_actor_added_index > number_actor_ids) {
+      Serial.println("Actor being registered was more than the number specified in initialisation.");
       return;
     }
 
@@ -379,6 +392,7 @@ void RegisterSensors(const char* sensor_names[]) {
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
     BaseRegisterActor(&new_actor);
+    last_actor_added_index++; // increment last actor added
   }
 
   void Tick() {
