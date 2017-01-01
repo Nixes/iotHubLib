@@ -240,7 +240,7 @@ private:
 
     // then print the response over Serial
     Serial.print("Response ID: ");
-    GetIdFromJson(http.getString(),*&actor_ptr->id);
+    GetIdFromJson(http.getString(),&actor_ptr->id);
 
     Serial.print(*actor_ptr->id); Serial.println("///end");
     //Serial.println( sensor_id );
