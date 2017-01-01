@@ -58,7 +58,7 @@ private:
    P(index) =
      "<html>\n"
      "<head>\n"
-     "<title>Hello World!</title>\n"
+     "<title>IOTHub Node</title>\n"
      "</head>\n"
      "<body>\n"
      "<h1>Test post please ignore!</h1>\n"
@@ -201,7 +201,7 @@ private:
     http.begin(iothub_server,iothub_port,"/api/sensors");
 
     // prep the json object
-    StaticJsonBuffer<200> jsonBuffer;
+    StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
     json_obj["name"] = sensor_name;
 
@@ -238,7 +238,7 @@ private:
     http.begin(iothub_server,iothub_port,"/api/actors");
 
     // prep the json object
-    StaticJsonBuffer<200> jsonBuffer;
+    StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
     json_obj["name"] = actor_ptr->name;
 
