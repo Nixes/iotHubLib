@@ -14,9 +14,9 @@ struct sensor {
 };
 struct actor {
   char id[25];
-  char name[100]; // actor name limited to 99 characters
+  const char* name; // actor name limited to 99 characters
   // for good example of using these "tagged unions" go to: http://stackoverflow.com/questions/18577404/how-can-a-mixed-data-type-int-float-char-etc-be-stored-in-an-array
-  enum{is_int, is_float, is_bool} state_type;
+  enum {is_int, is_float, is_bool} state_type;
   union {
     int istate;
     double fstate;
@@ -43,12 +43,13 @@ private:
   char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
   //char actor_ids[number_actor_ids][25];
   char sensor_names[number_sensor_ids][25]; // array of sensor names
-
+  uint last_sensor_added_index;
 
 
   // going to replace the id arrays with custom structs instead
   //sensor sensors[number_sensor_ids];
   actor actors[number_actor_ids];
+  uint last_actor_added_index; // the index of the last actor added
 
   static void GetActorsHandler(Request &req, Response &res) {
     // P macro for printing strings from program memory
@@ -359,12 +360,12 @@ void RegisterSensors(const char* sensor_names[]) {
     ShowEeprom();
   };
 
-  void RegisterActor(const char* actor_name[100] ,void (*function_pointer)(int)) {
+  void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
     actor new_actor;
     new_actor.name = actor_name;
-    new_actor.state_type = is_int;
+    new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
-    BaseRegisterActor(new_actor);
+    BaseRegisterActor(&new_actor);
   }
 
   void Tick() {
