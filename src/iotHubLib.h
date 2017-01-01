@@ -54,6 +54,7 @@ private:
   uint last_actor_added_index; // the index of the last actor added
 
   static void GetActorsHandler(Request &req, Response &res) {
+    Serial.printf("Root Page Requested");
     // P macro for printing strings from program memory
    P(index) =
      "<html>\n"
@@ -71,13 +72,17 @@ private:
 
   void RegisterRouteHandlers() {
     app.get("/", &GetActorsHandler);
+    Serial.printf("Routes Registered");
   }
 
   void CheckConnections() {
+    //Serial.print("*");
     WiFiClient client = server.available();
-    if (client){
+    if (client.available()){
+      Serial.printf("Client was available");
       app.process(&client);
     }
+    delay(20);
   }
 
   bool CheckFirstBoot() {
