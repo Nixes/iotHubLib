@@ -184,6 +184,11 @@ private:
   }
 
   void RegisterSensor(const char* sensor_name,char (*sensor_id)[25]) {
+    if (strlen(sensor_name) > max_node_name_length) {
+      Serial.println("Sensor being registered had a name length over that set by max_node_name_length");
+      return;
+    }
+
     Serial.println("Registering sensor");
     HTTPClient http;
 
