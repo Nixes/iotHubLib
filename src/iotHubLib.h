@@ -7,6 +7,8 @@
 // both these values are currently unused
 #define wifi_connection_time 2000 // how long it takes on average to reconnect to wifi
 #define sensor_aquisition_time 2000 // how long it takes to retrieve the sensor values
+#define max_node_name_length 100 // the maxiumum length of a nodes (sensor / actor) name
+
 
 struct sensor {
   char id[25];
@@ -361,6 +363,12 @@ void RegisterSensors(const char* sensor_names[]) {
   };
 
   void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
+    // do some validation
+    if (strlen(actor_name) > max_node_name_length) {
+      Serial.println("Actor being registered had a name length over that set by max_node_name_length");
+      return;
+    }
+
     actor new_actor;
     new_actor.name = actor_name;
     new_actor.state_type = actor::is_int;
