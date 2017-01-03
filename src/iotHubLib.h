@@ -267,9 +267,9 @@ private:
 
 public:
   // constructor
-  iotHubLib(char* server, int port) {
-    iothub_server = server;
-    iothub_port = port;
+  iotHubLib(char* tmp_server, int tmp_port) {
+    iothub_server = tmp_server;
+    iothub_port = tmp_port;
     last_actor_added_index = 0;
     last_sensor_added_index = 0;
   };
