@@ -72,17 +72,14 @@ private:
 
   void RegisterRouteHandlers() {
     app.get("/", &GetActorsHandler);
-    Serial.printf("Routes Registered");
+    Serial.println("Routes Registered");
   }
 
   void CheckConnections() {
-    //Serial.print("*");
     WiFiClient client = server.available();
     if (client.available()){
-      Serial.printf("Client was available");
       app.process(&client);
     }
-    delay(20);
   }
 
   bool CheckFirstBoot() {
@@ -408,6 +405,7 @@ void RegisterSensors(const char* sensor_names[]) {
   void Tick() {
     if (number_actor_ids > 0) {
       CheckConnections();
+      delay(20);
     }
     // disable wifi while sleeping
     //WiFi.forceSleepBegin();
