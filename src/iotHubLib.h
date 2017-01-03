@@ -293,7 +293,11 @@ public:
 
     Serial.print("Using Server: "); Serial.print(iothub_server); Serial.print(" Port: "); Serial.println(iothub_port);
 
-    RegisterRouteHandlers();
+    if (number_actor_ids > 0) {
+      server.begin();
+      Serial.println("Internal Actor Server Started");
+      RegisterRouteHandlers();
+    }
   }
 
   void ClearEeprom() {
