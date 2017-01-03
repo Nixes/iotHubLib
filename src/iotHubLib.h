@@ -397,6 +397,7 @@ void RegisterSensors(const char* sensor_names[]) {
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
     BaseRegisterActor(&new_actor);
+    actors[last_actor_added_index] = new_actor;
     last_actor_added_index++; // increment last actor added
   }
 
