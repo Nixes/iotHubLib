@@ -74,6 +74,13 @@ private:
    res.success("application/json");
   }
 
+void DebugRequest(Request &request) {
+  Serial.print("Request Type: ");
+  Serial.println(request.method());
+  Serial.print("Location: ");
+  Serial.println(request.urlPath());
+}
+
   // based on process method provided by aWOT
   void ProcessRequests(Client *client, char *buff, int buff_len) {
     if (client != NULL) {
@@ -91,9 +98,13 @@ private:
 
         // while there are more requests, keep processing them
         while (request.next()){
+          DebugRequest(request);
           Request::MethodType method =  request.method();
           if (method == Request::MethodType::GET) {
-            Serial.println("GET Request");
+            if (request.urlPath() == "actors") {
+              Serial.println("List of actors requested");
+              GetActorsHandler(request,response);
+            }
           }
           if (method == Request::MethodType::POST) {
             Serial.println("POST Request");
