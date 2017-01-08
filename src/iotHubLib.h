@@ -70,13 +70,17 @@ private:
    String json_string;
    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
 
-   res.print(json_string);
    res.success("application/json");
+   res.print(json_string);
   }
 
 void DebugRequest(Request &request) {
   Serial.print("Request Type: ");
-  Serial.println(request.method());
+  switch(request.method()){
+    case Request::MethodType::GET:
+    Serial.println("GET");
+    break;
+  }
   Serial.print("Location: ");
   Serial.println(request.urlPath());
 }
@@ -95,18 +99,21 @@ void DebugRequest(Request &request) {
       } else {
         Request::HeaderNode* header_tail;
         request.processHeaders(header_tail);
+        Serial.println("Processing Requests");
 
         // while there are more requests, keep processing them
-        while (request.next()){
+        if (request.next()){
           bool route_found = false; // this should be set to true by any route conditional
 
-          //DebugRequest(request);
+          DebugRequest(request);
           Request::MethodType method =  request.method();
+          char* url_path =  request.urlPath();
 
           if (method == Request::MethodType::GET) {
             // GET routes
+            Serial.println("GET Path");
 
-            if (request.urlPath() == "sensors") {
+            if (strcmp(url_path, "actors") == 0 ) {
               route_found = true;
               Serial.println("List of actors requested");
               GetActorsHandler(request,response);
