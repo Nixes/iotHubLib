@@ -56,7 +56,7 @@ private:
   void GetActorsHandler(Request &req, Response &res) {
    Serial.println("Sensor Listing Requested");
 
-   Serial.print("Number actor ids");
+   Serial.print("Number actor ids: ");
    Serial.println(number_actor_ids);
 
    StaticJsonBuffer<200> jsonBuffer;
@@ -99,7 +99,6 @@ void DebugRequest(Request &request) {
       } else {
         Request::HeaderNode* header_tail;
         request.processHeaders(header_tail);
-        Serial.println("Processing Requests");
 
         // while there are more requests, keep processing them
         if (request.next()){
@@ -111,11 +110,8 @@ void DebugRequest(Request &request) {
 
           if (method == Request::MethodType::GET) {
             // GET routes
-            Serial.println("GET Path");
-
             if (strcmp(url_path, "actors") == 0 ) {
               route_found = true;
-              Serial.println("List of actors requested");
               GetActorsHandler(request,response);
             }
           }
@@ -126,9 +122,8 @@ void DebugRequest(Request &request) {
 
           // if no route is found, send a 404
           if (!route_found) {
-            Serial.println("internal actor server responded with: 404");
+            Serial.println("internal rest server 404ed");
             response.notFound();
-            response.print("404 response");
           }
         }
         request.reset();
