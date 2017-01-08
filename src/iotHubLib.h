@@ -88,9 +88,17 @@ private:
       } else {
         Request::HeaderNode* header_tail;
         request.processHeaders(header_tail);
-        
 
-
+        // while there are more requests, keep processing them
+        while (request.next()){
+          Request::MethodType method =  request.method();
+          if (method == Request::MethodType::GET) {
+            Serial.println("GET Request");
+          }
+          if (method == Request::MethodType::POST) {
+            Serial.println("POST Request");
+          }
+        }
       }
     }
   }
