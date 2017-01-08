@@ -54,31 +54,41 @@ private:
   uint last_actor_added_index; // the index of the last actor added
 
   static void GetActorsHandler(Request &req, Response &res) {
-    Serial.printf("Root Page Requested");
-    // P macro for printing strings from program memory
-   P(index) =
-     "<html>\n"
-     "<head>\n"
-     "<title>IOTHub Node</title>\n"
-     "</head>\n"
-     "<body>\n"
-     "<h1>Test post please ignore!</h1>\n"
-     "</body>\n"
-     "</html>";
+   Serial.println("Sensor Listing Requested");
 
-   res.success("text/html");
-   res.printP(index);
+   Serial.print("Number actor ids");
+   Serial.println(number_actor_ids);
+
+   StaticJsonBuffer<200> jsonBuffer;
+   JsonObject& json_obj = jsonBuffer.createObject();
+
+   for (uint i = 0; i < number_actor_ids; i++) {
+     json_obj[i] = actors[i].id;
+   }
+
+   // add the json to a string
+   String json_string;
+   json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
+
+   res.print(json_string);
+   res.success("application/json");
   }
 
   void RegisterRouteHandlers() {
-    app.get("/", &GetActorsHandler);
+    app.get("/actors", &GetActorsHandler, &actors, number_actor_ids);
     Serial.println("Routes Registered");
+  }
+
+  void ProcessRequests(Client *client, char *buff, int buff_len) {
+
+    client_object = client;
   }
 
   void CheckConnections() {
     WiFiClient client = server.available();
     if (client.available()){
-      app.process(&client);
+      char request[SERVER_DEFAULT_REQUEST_LENGTH]
+      ProcessRequests(client, request, SERVER_DEFAULT_REQUEST_LENGTH);
     }
   }
 
@@ -225,7 +235,7 @@ private:
     http.end();
   }
 
-  // test that saved sensors Ids are still registered
+  // test that saved sensors Ids are still registered, TODO: complete
   void CheckRegistered() {
     HTTPClient http;
     http.begin(iothub_server,iothub_port,"/api/sensors/");
