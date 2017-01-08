@@ -53,7 +53,7 @@ private:
   actor actors[number_actor_ids];
   uint last_actor_added_index; // the index of the last actor added
 
-  static void GetActorsHandler(Request &req, Response &res) {
+  void GetActorsHandler(Request &req, Response &res) {
    Serial.println("Sensor Listing Requested");
 
    Serial.print("Number actor ids");
@@ -74,21 +74,18 @@ private:
    res.success("application/json");
   }
 
-  void RegisterRouteHandlers() {
-    app.get("/actors", &GetActorsHandler, &actors, number_actor_ids);
-    Serial.println("Routes Registered");
-  }
-
   void ProcessRequests(Client *client, char *buff, int buff_len) {
-
-    client_object = client;
+    if (client != NULL) {
+      Request request;
+      request.init(client, buff, buff_len);
+    }
   }
 
   void CheckConnections() {
     WiFiClient client = server.available();
     if (client.available()){
-      char request[SERVER_DEFAULT_REQUEST_LENGTH]
-      ProcessRequests(client, request, SERVER_DEFAULT_REQUEST_LENGTH);
+      char request[SERVER_DEFAULT_REQUEST_LENGTH];
+      ProcessRequests(&client, request, SERVER_DEFAULT_REQUEST_LENGTH);
     }
   }
 
@@ -303,7 +300,6 @@ public:
     if (number_actor_ids > 0) {
       server.begin();
       Serial.println("Internal Actor Server Started");
-      RegisterRouteHandlers();
     }
   }
 
