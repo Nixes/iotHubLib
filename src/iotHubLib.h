@@ -74,10 +74,24 @@ private:
    res.success("application/json");
   }
 
+  // based on process method provided by aWOT
   void ProcessRequests(Client *client, char *buff, int buff_len) {
     if (client != NULL) {
       Request request;
+      Response response;
+
+      response.init(client);
       request.init(client, buff, buff_len);
+      request.processRequest();
+      if (request.method() == Request::INVALID) {
+        response.fail();
+      } else {
+        Request::HeaderNode* header_tail;
+        request.processHeaders(header_tail);
+        
+
+
+      }
     }
   }
 
