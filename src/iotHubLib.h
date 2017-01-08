@@ -63,7 +63,7 @@ private:
    JsonObject& json_obj = jsonBuffer.createObject();
 
    for (uint i = 0; i < number_actor_ids; i++) {
-     json_obj[i] = actors[i].id;
+     json_obj["actors"][i] = actors[i].id;
    }
 
    // add the json to a string
@@ -98,18 +98,34 @@ void DebugRequest(Request &request) {
 
         // while there are more requests, keep processing them
         while (request.next()){
-          DebugRequest(request);
+          bool route_found = false; // this should be set to true by any route conditional
+
+          //DebugRequest(request);
           Request::MethodType method =  request.method();
+
           if (method == Request::MethodType::GET) {
-            if (request.urlPath() == "actors") {
+            // GET routes
+
+            if (request.urlPath() == "sensors") {
+              route_found = true;
               Serial.println("List of actors requested");
               GetActorsHandler(request,response);
             }
           }
-          if (method == Request::MethodType::POST) {
-            Serial.println("POST Request");
+          else if (method == Request::MethodType::POST) {
+            // POST routes
+
+          }
+
+          // if no route is found, send a 404
+          if (!route_found) {
+            Serial.println("internal actor server responded with: 404");
+            response.notFound();
+            response.print("404 response");
           }
         }
+        request.reset();
+        response.reset();
       }
     }
   }
