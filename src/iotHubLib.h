@@ -74,16 +74,24 @@ private:
    res.print(json_string);
   }
 
-void DebugRequest(Request &request) {
-  Serial.print("Request Type: ");
-  switch(request.method()){
-    case Request::MethodType::GET:
-    Serial.println("GET");
-    break;
+  void DebugRequest(Request &request) {
+    Serial.print("Request Type: ");
+    switch(request.method()){
+      case Request::MethodType::GET:
+      Serial.println("GET");
+      break;
+    }
+    Serial.print("Location: ");
+    Serial.println(request.urlPath());
   }
-  Serial.print("Location: ");
-  Serial.println(request.urlPath());
-}
+
+  // if they are the same this returns true
+  bool CStringCompare(char* string_1, char* string_2) {
+    if (strcmp(string_1, string_2) == 0) {
+      return true;
+    }
+    return false;
+  }
 
   // based on process method provided by aWOT
   void ProcessRequests(Client *client, char *buff, int buff_len) {
@@ -110,7 +118,7 @@ void DebugRequest(Request &request) {
 
           if (method == Request::MethodType::GET) {
             // GET routes
-            if (strcmp(url_path, "actors") == 0 ) {
+            if (CStringCompare(url_path, "actors")) {
               route_found = true;
               GetActorsHandler(request,response);
             }
