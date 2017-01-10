@@ -78,7 +78,10 @@ private:
     Serial.print("Request Type: ");
     switch(request.method()){
       case Request::MethodType::GET:
-      Serial.println("GET");
+        Serial.println("GET");
+      break;
+      case Request::MethodType::POST:
+        Serial.println("GET");
       break;
     }
     Serial.print("Location: ");
