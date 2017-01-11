@@ -88,6 +88,28 @@ private:
     Serial.println(request.urlPath());
   }
 
+  bool MatchRoute(char* full_string, char* route, uint* colon_location) {
+    byte string_len = strlen(full_string);
+    byte route_len = strlen(route);
+    uint i = 0;
+    colon_location = 0;
+
+    while (i < string_len && i < route_len){
+      if (full_string[i] == route[i]) {
+        i++;
+      } else if (route[i] == ':') {
+        *colon_location = i;
+        Serial.println("Matched colon");
+        return true;
+      }
+    }
+    if (i == route_len) {
+      Serial.println("Matched whole route string");
+      return true;
+    }
+    return false;
+  }
+
   // if they are the same this returns true
   bool CStringCompare(char* string_1, char* string_2) {
     if (strcmp(string_1, string_2) == 0) {
@@ -121,9 +143,15 @@ private:
 
           if (method == Request::MethodType::GET) {
             // GET routes
+            // static routes
             if (CStringCompare(url_path, "actors")) {
               route_found = true;
               GetActorsHandler(request,response);
+            }
+            // dynamic routes
+            uint colon_location;
+            if (MatchRoute(url_path,"actors/:something",&colon_location)) {
+              Serial.println("Matched actors/:something");
             }
           }
           else if (method == Request::MethodType::POST) {
