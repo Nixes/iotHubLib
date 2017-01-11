@@ -90,17 +90,23 @@ private:
 
 
   char* RouteParameter(char* full_string, uint colon_location) {
+    if (full_string == NULL) return NULL;
     byte string_len = strlen(full_string);
     // find the end of the dynamic route parameter
-    uint i = 0;
-    while (i < string_len) {
+    uint param_end = colon_location;
+    while (param_end < string_len && full_string[param_end] != '/') {
+      param_end++;
+    }
+    // copy into a new string
+    char route_parameter[1 + param_end - colon_location]; // plus one for null term
+    for (uint j = 0; j < (param_end - colon_location); j++) {
+      route_parameter[j] = full_string[param_end + j];
+      Serial.print("Char: ");
+      Serial.println(full_string[colon_location + j]);
+    }
+    route_parameter[1 + param_end - colon_location] = '\0'; // add null terminator
 
-    }
-    // copy into an array
-    char route_parameter[i - colon_location];
-    for (uint j = 0; j < i; j++) {
-      route_parameter[j] = full_string[i + j];
-    }
+    Serial.print("Route Param: ");
     Serial.println(route_parameter);
     return route_parameter;
   }
@@ -170,7 +176,7 @@ private:
             if (MatchRoute(url_path,"actors/:something",&colon_location)) {
               route_found = true;
               Serial.println("Matched actors/:something");
-              //RouteParameter(url_path,colon_location);
+              RouteParameter(url_path,colon_location);
             }
           }
           else if (method == Request::MethodType::POST) {
