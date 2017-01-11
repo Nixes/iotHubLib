@@ -110,7 +110,6 @@ private:
     byte string_len = strlen(full_string);
     byte route_len = strlen(route);
     uint i = 0;
-    colon_location = 0;
 
     while (i < string_len && i < route_len){
       if (full_string[i] == route[i]) {
@@ -167,8 +166,9 @@ private:
               GetActorsHandler(request,response);
             }
             // dynamic routes
-            uint colon_location;
+            uint colon_location = 0;
             if (MatchRoute(url_path,"actors/:something",&colon_location)) {
+              route_found = true;
               Serial.println("Matched actors/:something");
               //RouteParameter(url_path,colon_location);
             }
