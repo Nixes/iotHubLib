@@ -54,24 +54,24 @@ private:
   uint last_actor_added_index; // the index of the last actor added
 
   void GetActorsHandler(Request &req, Response &res) {
-   Serial.println("Sensor Listing Requested");
+    Serial.println("Sensor Listing Requested");
 
-   Serial.print("Number actor ids: ");
-   Serial.println(number_actor_ids);
+    Serial.print("Number actor ids: ");
+    Serial.println(number_actor_ids);
 
-   StaticJsonBuffer<200> jsonBuffer;
-   JsonObject& json_obj = jsonBuffer.createObject();
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& json_obj = jsonBuffer.createObject();
 
-   for (uint i = 0; i < number_actor_ids; i++) {
-     json_obj["actors"][i] = actors[i].id;
-   }
+    for (uint i = 0; i < number_actor_ids; i++) {
+      json_obj["actors"][i] = actors[i].id;
+    }
 
-   // add the json to a string
-   String json_string;
-   json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
+    // add the json to a string
+    String json_string;
+    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it  is sending
 
-   res.success("application/json");
-   res.print(json_string);
+    res.success("application/json");
+    res.print(json_string);
   }
 
   void DebugRequest(Request &request) {
