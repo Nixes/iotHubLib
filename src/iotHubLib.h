@@ -585,6 +585,18 @@ void RegisterSensors(const char* sensor_names[]) {
     last_actor_added_index++; // increment last actor added
   }
 
+  void AddDummyActors() {
+    // add as many actors as we have space for
+    for (uint i = 0; i < number_actor_ids; i++) {
+      actors[i].name = "Dummy actor name";
+      char id[25] = "54tr65e4rsr2d3t57q9t3a1h";
+      strncpy(actors[i].id,id,25);
+
+      actors[i].state_type = actor::is_int;
+      actors[i].state.istate = 10;
+    }
+  }
+
   void Tick() {
     if (number_actor_ids > 0) {
       CheckConnections();
