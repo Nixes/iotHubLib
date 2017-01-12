@@ -89,6 +89,10 @@ private:
   }
 
   void PrintStringFragment (char * string_fragment, uint string_fragment_length) {
+    if (string_fragment == NULL) {
+      Serial.println("String fragment pointer was null");
+      return;
+    }
     Serial.print("String Fragment: ");
     for (uint i =0; i < string_fragment_length; i++) {
       Serial.print(string_fragment[i]);
@@ -212,7 +216,7 @@ private:
               uint route_parameter_len;
               RouteParameter(url_path,colon_location, route_parameter, &route_parameter_len);
               Serial.print("Route Param: ");
-              Serial.println(route_parameter);
+              PrintStringFragment(route_parameter, route_parameter_len);
             }
           }
           else if (method == Request::MethodType::POST) {
