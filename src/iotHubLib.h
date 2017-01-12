@@ -132,7 +132,7 @@ private:
     res.print(json_string);
   }
 
-  // takes in two parameters, a pointer to the full url string, the location of the colin
+  // takes in two parameters, a pointer to the full url string, the location of the colon
   void RouteParameter(char* full_string, uint colon_location, char* route_parameter_pointer, uint * route_parameter_len) {
     if (full_string == NULL) return;
     const byte string_len = strlen(full_string);
