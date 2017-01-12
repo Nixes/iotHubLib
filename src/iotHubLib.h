@@ -66,12 +66,8 @@ private:
       json_obj["actors"][i] = actors[i].id;
     }
 
-    // add the json to a string
-    String json_string;
-    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it  is sending
-
     res.success("application/json");
-    res.print(json_string);
+    json_obj.printTo(res);
   }
 
   void DebugRequest(Request &request) {
