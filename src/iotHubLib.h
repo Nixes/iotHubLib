@@ -59,15 +59,32 @@ private:
     Serial.print("Number actor ids: ");
     Serial.println(number_actor_ids);
 
-    StaticJsonBuffer<200> jsonBuffer;
-    JsonObject& json_obj = jsonBuffer.createObject();
+    StaticJsonBuffer<600> jsonBuffer;
+    JsonArray& json_array = jsonBuffer.createArray();
 
     for (uint i = 0; i < number_actor_ids; i++) {
-      json_obj["actors"][i] = actors[i].id;
+      Serial.print("Actor ID:"); Serial.println(actors[i].id);
+      JsonObject& json_obj = json_array.createNestedObject();
+      json_obj["id"] = actors[i].id;
+      json_obj["name"] = actors[i].name;
+
+      switch (actors[i].state_type) {
+        case actor::is_int:
+        json_obj["state"] = actors[i].state.istate;
+        break;
+
+        case actor::is_float:
+        json_obj["state"] = actors[i].state.fstate;
+        break;
+
+        case actor::is_bool:
+        json_obj["state"] = actors[i].state.bstate;
+        break;
+      }
     }
 
     res.success("application/json");
-    json_obj.printTo(res);
+    json_array.printTo(res);
   }
 
   void DebugRequest(Request &request) {
@@ -137,6 +154,14 @@ private:
     switch (actor->state_type) {
       case actor::is_int:
       json_obj["state"] = actor->state.istate;
+      break;
+
+      case actor::is_float:
+      json_obj["state"] = actor->state.fstate;
+      break;
+
+      case actor::is_bool:
+      json_obj["state"] = actor->state.bstate;
       break;
     }
 
