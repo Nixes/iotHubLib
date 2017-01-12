@@ -88,29 +88,58 @@ private:
     Serial.println(request.urlPath());
   }
 
+  void PrintStringFragment (char * string_fragment, uint string_fragment_length) {
+    Serial.print("String Fragment: ");
+    for (uint i =0; i < string_fragment_length; i++) {
+      Serial.print(string_fragment[i]);
+    }
+    Serial.println();
+  }
 
-  char* RouteParameter(char* full_string, uint colon_location) {
-    if (full_string == NULL) return NULL;
+  actor* FindActor() {
+
+  }
+
+  void GetActorHandler(Request &req, Response &res) {
+    Serial.println("Single Actor listing requested");
+
+    actor* actor = FindActor();
+    if (actor == NULL) return; // make sure the id exists before sending anything
+
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& json_obj = jsonBuffer.createObject();
+
+    json_obj["id"] = actor->id;
+    json_obj["name"] = actor->name;
+
+    // determine type of actor so we can figure out which tagged union var to send
+    switch (actor->state_type) {
+      case actor::is_int:
+      json_obj["state"] = actor->state.istate;
+      break;
+    }
+
+
+    // add the json to a string
+    String json_string;
+    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
+
+    res.success("application/json");
+    res.print(json_string);
+  }
+
+  // takes in two parameters, a pointer to the full url string, the location of the colin
+  void RouteParameter(char* full_string, uint colon_location, char* route_parameter_pointer, uint * route_parameter_len) {
+    if (full_string == NULL) return;
     const byte string_len = strlen(full_string);
     // find the end of the dynamic route parameter
     uint param_end = colon_location;
     while (param_end < string_len && full_string[param_end] != '/') {
       param_end++;
     }
-    // copy into a new string
-    const uint route_parameter_len =  param_end - colon_location;
-    Serial.print("Route param len: "); Serial.println(route_parameter_len);
-    char * route_parameter = (char*)malloc(route_parameter_len + 1); // leave space for null term
-
-    for (uint j = 0; j < route_parameter_len; j++) {
-      route_parameter[j] = full_string[colon_location + j];
-    }
-
-    route_parameter[route_parameter_len + 1] = '\0'; // add null terminator
-    Serial.print("Route Param: ");
-    Serial.println(route_parameter);
-
-    return route_parameter;
+    // find end of string
+    *route_parameter_len =  param_end - colon_location;
+    Serial.print("Route param len: "); Serial.println(*route_parameter_len);
   }
 
 
@@ -179,9 +208,11 @@ private:
               route_found = true;
               Serial.println("Matched actors/:something");
 
-              char* route_param = RouteParameter(url_path,colon_location);
+              char* route_parameter;
+              uint route_parameter_len;
+              RouteParameter(url_path,colon_location, route_parameter, &route_parameter_len);
               Serial.print("Route Param: ");
-              Serial.println(route_param);
+              Serial.println(route_parameter);
             }
           }
           else if (method == Request::MethodType::POST) {
