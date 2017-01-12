@@ -100,15 +100,18 @@ private:
     Serial.println();
   }
 
-  actor* FindActor() {
-
-  }
-
-  void GetActorHandler(Request &req, Response &res) {
+  void GetActorHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
     Serial.println("Single Actor listing requested");
 
-    actor* actor = FindActor();
-    if (actor == NULL) return; // make sure the id exists before sending anything
+    if (actor_id_length != 24) {
+      Serial.println("The passed in actor_id was not the standard 24 characters long");
+      return;
+    }
+    actor* actor = FindActor(actor_id);
+    if (actor == NULL) {
+      Serial.println("Was unable to find matching actor");
+      return;
+    } // make sure the id exists before sending anything
 
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
@@ -133,7 +136,7 @@ private:
   }
 
   // takes in two parameters, a pointer to the full url string, the location of the colon
-  void RouteParameter(char* full_string, uint colon_location, char* route_parameter_pointer, uint * route_parameter_len) {
+  void RouteParameter(char* full_string, uint colon_location, char** route_parameter_pointer, uint * route_parameter_len) {
     if (full_string == NULL) return;
     const byte string_len = strlen(full_string);
     // find the end of the dynamic route parameter
@@ -141,9 +144,8 @@ private:
     while (param_end < string_len && full_string[param_end] != '/') {
       param_end++;
     }
-    // find end of string
+    *route_parameter_pointer = full_string + colon_location; // the new pointer location is full string pointer location offset by colon location
     *route_parameter_len =  param_end - colon_location;
-    Serial.print("Route param len: "); Serial.println(*route_parameter_len);
   }
 
 
@@ -214,9 +216,11 @@ private:
 
               char* route_parameter;
               uint route_parameter_len;
-              RouteParameter(url_path,colon_location, route_parameter, &route_parameter_len);
+              RouteParameter(url_path,colon_location, &route_parameter, &route_parameter_len);
               Serial.print("Route Param: ");
               PrintStringFragment(route_parameter, route_parameter_len);
+              GetActorHandler(request,response,route_parameter,route_parameter_len);
+
             }
           }
           else if (method == Request::MethodType::POST) {
