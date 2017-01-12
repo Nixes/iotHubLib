@@ -144,13 +144,8 @@ private:
       break;
     }
 
-
-    // add the json to a string
-    String json_string;
-    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
-
     res.success("application/json");
-    res.print(json_string);
+    json_obj.printTo(res); // send straight to http output
   }
 
   // takes in two parameters, a pointer to the full url string, the location of the colon
@@ -238,7 +233,6 @@ private:
               Serial.print("Route Param: ");
               PrintStringFragment(route_parameter, route_parameter_len);
               GetActorHandler(request,response,route_parameter,route_parameter_len);
-
             }
           }
           else if (method == Request::MethodType::POST) {
