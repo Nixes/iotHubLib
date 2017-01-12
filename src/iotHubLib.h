@@ -100,6 +100,24 @@ private:
     Serial.println();
   }
 
+  actor* FindActor(char* actor_id) {
+    Serial.println("Searching for matching actor");
+    for (uint i = 0; i < number_actor_ids; i++) {
+      // check if identical, TODO: restructure as a while loop
+      bool non_match_found = false;
+      uint id_digit;
+      for (id_digit = 0; id_digit < 24; id_digit++) { // 24 is number of digits in id excluding null terminator
+        Serial.print(actors[i].id[id_digit]); Serial.print(" : "); Serial.println(actor_id[id_digit]);
+        if (actors[i].id[id_digit] != actor_id[id_digit]){
+          non_match_found = true;
+          break;
+        };
+      }
+      Serial.print("Id_digit: "); Serial.println(id_digit);
+      if (id_digit == 24 && !non_match_found) return &actors[i];
+    }
+  }
+
   void GetActorHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
     Serial.println("Single Actor listing requested");
 
