@@ -71,8 +71,6 @@ private:
 
   // This finds and updates the actor with an id that matches that passed in. It also runs the corresponding callback.
   void PostActorStateHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
-    Serial.println("Single Actor listing requested");
-
     if (actor_id_length != 24) {
       Serial.println("The passed in actor_id was not the standard 24 characters long");
       return;
@@ -102,15 +100,15 @@ private:
     switch (actor->state_type) {
       case actor::is_int:
       Serial.println("Run int callback");
-      actor->on_update.icallback(11);
+      actor->on_update.icallback(request_json["state"]);
       break;
 
       case actor::is_float:
-      actor->on_update.fcallback(11.1);
+      actor->on_update.fcallback(request_json["state"]);
       break;
 
       case actor::is_bool:
-      actor->on_update.bcallback(true);
+      actor->on_update.bcallback(request_json["state"]);
       break;
     }
 
