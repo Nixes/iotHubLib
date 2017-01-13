@@ -53,6 +53,23 @@ private:
   actor actors[number_actor_ids];
   uint last_actor_added_index; // the index of the last actor added
 
+  char * CStringReqBody (Request &req) {
+    char c_string_body [50];
+    uint c_string_body_len = 0;
+
+    int bytebuff;
+    while ((bytebuff = req.read()) != -1 && c_string_body_len < 50) {
+      c_string_body[c_string_body_len] = (char)bytebuff;
+      c_string_body_len++;
+      // and a proper null terminator to the end
+      if (c_string_body_len > 0) {
+        c_string_body[c_string_body_len] = (char)0;
+      }
+    }
+    //Serial.print(" Len: "); Serial.print(c_string_body_len); Serial.println("FIN");
+    return c_string_body;
+  }
+
   // This finds and updates the actor with an id that matches that passed in. It also runs the corresponding callback.
   void PostActorStateHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
     Serial.println("Single Actor listing requested");
@@ -67,39 +84,49 @@ private:
       return;
     } // make sure the id exists before sending anything
 
-    // update the actor state
 
+    // update the actor state
+    /*
+    StaticJsonBuffer<50> request_json_buff;
+    JsonObject& request_json = request_json_buff.parseObject(req);
+
+    if (!request_json.success()) {
+      Serial.println("Failed to parse actor state JSON");
+      return;
+    }
+    */
 
     // run the callback with the new state
     switch (actor->state_type) {
       case actor::is_int:
-      actor->on_update.icallback();
+      actor->on_update.icallback(11);
       break;
 
       case actor::is_float:
-      actor->on_update.fcallback();
+      actor->on_update.fcallback(11.1);
       break;
 
       case actor::is_bool:
-      actor->on_update.bcallback();
+      actor->on_update.bcallback(true);
       break;
     }
 
+    // send a response with the new state to confirm the action has completed
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
 
     // determine type of actor so we can figure out which tagged union var to send
     switch (actor->state_type) {
       case actor::is_int:
-      json_obj["state"] = actor->state.istate();
+      json_obj["state"] = actor->state.istate;
       break;
 
       case actor::is_float:
-      json_obj["state"] = actor->state.fstate();
+      json_obj["state"] = actor->state.fstate;
       break;
 
       case actor::is_bool:
-      json_obj["state"] = actor->state.bstate();
+      json_obj["state"] = actor->state.bstate;
       break;
     }
 
@@ -153,6 +180,9 @@ private:
     }
     Serial.print("Location: ");
     Serial.println(request.urlPath());
+
+    Serial.print("Request Body: ");
+    Serial.println(CStringReqBody(request));
   }
 
   void PrintStringFragment (char * string_fragment, uint string_fragment_length) {
@@ -312,7 +342,19 @@ private:
           }
           else if (method == Request::MethodType::POST) {
             // POST routes
+            // dynamic routes
+            uint colon_location = 0;
+            if (MatchRoute(url_path,"actors/:something",&colon_location)) {
+              route_found = true;
+              Serial.println("Matched actors/:something ");
 
+              char* route_parameter;
+              uint route_parameter_len;
+              RouteParameter(url_path,colon_location, &route_parameter, &route_parameter_len);
+              Serial.print("Route Param: ");
+              PrintStringFragment(route_parameter, route_parameter_len);
+              PostActorStateHandler(request,response,route_parameter,route_parameter_len);
+            }
           }
 
           // if no route is found, send a 404
