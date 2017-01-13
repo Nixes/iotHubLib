@@ -53,8 +53,8 @@ private:
   actor actors[number_actor_ids];
   uint last_actor_added_index; // the index of the last actor added
 
-  char * CStringReqBody (Request &req) {
-    char c_string_body [50];
+  // takes in the request object whose body is desired, and a pointer to c_string to write the string
+  void CStringReqBody (Request &req, char* c_string_body) {
     uint c_string_body_len = 0;
 
     int bytebuff;
@@ -67,7 +67,6 @@ private:
       }
     }
     //Serial.print(" Len: "); Serial.print(c_string_body_len); Serial.println("FIN");
-    return c_string_body;
   }
 
   // This finds and updates the actor with an id that matches that passed in. It also runs the corresponding callback.
@@ -86,19 +85,23 @@ private:
 
 
     // update the actor state
-    /*
+    char c_string_body[50];
+    CStringReqBody(req, c_string_body);
+    Serial.print("Actor state JSON: "); Serial.println(c_string_body);
     StaticJsonBuffer<50> request_json_buff;
-    JsonObject& request_json = request_json_buff.parseObject(req);
+    JsonObject& request_json = request_json_buff.parseObject(c_string_body);
 
     if (!request_json.success()) {
       Serial.println("Failed to parse actor state JSON");
       return;
     }
-    */
+
+    Serial.println("Running callback...");
 
     // run the callback with the new state
     switch (actor->state_type) {
       case actor::is_int:
+      Serial.println("Run int callback");
       actor->on_update.icallback(11);
       break;
 
@@ -111,6 +114,7 @@ private:
       break;
     }
 
+    Serial.println("Sending confirmation response back to hub");
     // send a response with the new state to confirm the action has completed
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
@@ -180,9 +184,12 @@ private:
     }
     Serial.print("Location: ");
     Serial.println(request.urlPath());
-
+    /* This is disabled as it actually consumes the request body so it cannot be later routes
     Serial.print("Request Body: ");
-    Serial.println(CStringReqBody(request));
+    char c_string_body[50];
+    CStringReqBody(request, c_string_body);
+    Serial.println(c_string_body);
+    */
   }
 
   void PrintStringFragment (char * string_fragment, uint string_fragment_length) {
@@ -696,7 +703,7 @@ void RegisterSensors(const char* sensor_names[]) {
     last_actor_added_index++; // increment last actor added
   }
 
-  void AddDummyActors() {
+  void AddDummyActors(void (*function_pointer)(int)) {
     // add as many actors as we have space for
     for (uint i = 0; i < number_actor_ids; i++) {
       actors[i].name = "Dummy actor name";
@@ -705,6 +712,7 @@ void RegisterSensors(const char* sensor_names[]) {
 
       actors[i].state_type = actor::is_int;
       actors[i].state.istate = 10;
+      actors[i].on_update.icallback = function_pointer;
     }
   }
 
