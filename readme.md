@@ -3,6 +3,8 @@ This is a library for the esp8266 arduino platform that allows easy writing of s
 
 Should support up to 20 sensors per device.
 
+Stable releases are found under releases.
+
 #Dependencies
 - [aWOT](https://github.com/lasselukkari/aWOT)
 - ArduinoJson
