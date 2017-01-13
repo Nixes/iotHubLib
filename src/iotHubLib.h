@@ -53,6 +53,60 @@ private:
   actor actors[number_actor_ids];
   uint last_actor_added_index; // the index of the last actor added
 
+  // This finds and updates the actor with an id that matches that passed in. It also runs the corresponding callback.
+  void PostActorStateHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
+    Serial.println("Single Actor listing requested");
+
+    if (actor_id_length != 24) {
+      Serial.println("The passed in actor_id was not the standard 24 characters long");
+      return;
+    }
+    actor* actor = FindActor(actor_id);
+    if (actor == NULL) {
+      Serial.println("Was unable to find matching actor");
+      return;
+    } // make sure the id exists before sending anything
+
+    // update the actor state
+
+
+    // run the callback with the new state
+    switch (actor->state_type) {
+      case actor::is_int:
+      actor->on_update.icallback();
+      break;
+
+      case actor::is_float:
+      actor->on_update.fcallback();
+      break;
+
+      case actor::is_bool:
+      actor->on_update.bcallback();
+      break;
+    }
+
+    StaticJsonBuffer<200> jsonBuffer;
+    JsonObject& json_obj = jsonBuffer.createObject();
+
+    // determine type of actor so we can figure out which tagged union var to send
+    switch (actor->state_type) {
+      case actor::is_int:
+      json_obj["state"] = actor->state.istate();
+      break;
+
+      case actor::is_float:
+      json_obj["state"] = actor->state.fstate();
+      break;
+
+      case actor::is_bool:
+      json_obj["state"] = actor->state.bstate();
+      break;
+    }
+
+    res.success("application/json");
+    json_obj.printTo(res); // send straight to http output
+  }
+
   void GetActorsHandler(Request &req, Response &res) {
     Serial.println("Sensor Listing Requested");
 
