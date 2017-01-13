@@ -100,15 +100,18 @@ private:
     switch (actor->state_type) {
       case actor::is_int:
       Serial.println("Run int callback");
-      actor->on_update.icallback(request_json["state"]);
+      actor->state.istate = request_json["state"];
+      actor->on_update.icallback(actor->state.istate);
       break;
 
       case actor::is_float:
-      actor->on_update.fcallback(request_json["state"]);
+      actor->state.fstate = request_json["state"];
+      actor->on_update.fcallback(actor->state.fstate);
       break;
 
       case actor::is_bool:
-      actor->on_update.bcallback(request_json["state"]);
+      actor->state.bstate = request_json["state"];
+      actor->on_update.bcallback(actor->state.bstate);
       break;
     }
 
