@@ -115,7 +115,6 @@ private:
       break;
     }
 
-    Serial.println("Sending confirmation response back to hub");
     // send a response with the new state to confirm the action has completed
     StaticJsonBuffer<200> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
@@ -287,6 +286,8 @@ private:
         *colon_location = i;
         Serial.println("Matched colon");
         return true;
+      } else {
+        return false;
       }
     }
     if (i == route_len) {
