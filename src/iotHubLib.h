@@ -218,7 +218,10 @@ private:
         };
       }
       Serial.print("Id_digit: "); Serial.println(id_digit);
-      if (id_digit == 24 && !non_match_found) return &actors[i];
+      if (id_digit == 24 && !non_match_found) {
+        return &actors[i];
+      }
+      return NULL;
     }
   }
 
@@ -294,6 +297,7 @@ private:
       Serial.println("Matched whole route string");
       return true;
     }
+    Serial.println("Returning false");
     return false;
   }
 
@@ -536,7 +540,7 @@ private:
     http.end();
   }
 
-  void BaseRegisterActor(actor *actor_ptr) {
+  void BaseRegisterActor(actor *actor_ptr,char * state_type) {
     Serial.println("Registering actor");
     HTTPClient http;
 
@@ -547,6 +551,7 @@ private:
     StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
     json_obj["name"] = actor_ptr->name;
+    json_obj["state_type"] = state_type;
 
     http.addHeader("Content-Type","application/json"); // important! JSON conversion in nodejs requires this
 
@@ -700,7 +705,7 @@ void RegisterSensors(const char* sensor_names[]) {
     new_actor.name = actor_name;
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
-    BaseRegisterActor(&new_actor);
+    BaseRegisterActor(&new_actor,"number");
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++; // increment last actor added
   }
