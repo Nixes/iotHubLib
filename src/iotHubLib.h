@@ -11,11 +11,11 @@
 
 
 struct sensor {
-  char id[25];
-  char name[100]; // sensor name limited to 99 characters
+  char id[25]; // ids are 24 alphanumeric keys long, the extra char is for the null character
+  const char* name; // sensor name limited to 99 characters
 };
 struct actor {
-  char id[25];
+  char id[25]; // ids are 24 alphanumeric keys long, the extra char is for the null character
   const char* name; // actor name limited to 99 characters
   // for good example of using these "tagged unions" go to: http://stackoverflow.com/questions/18577404/how-can-a-mixed-data-type-int-float-char-etc-be-stored-in-an-array
   enum {is_int, is_float, is_bool} state_type;
@@ -42,15 +42,10 @@ private:
 
   uint sleep_interval = 30000; // default of 30 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
-  char sensor_ids[number_sensor_ids][25]; // array of sensor ID's, sensor ids are 24 alphanumeric keys long, the extra char is for the null character
-  //char actor_ids[number_actor_ids][25];
-  char sensor_names[number_sensor_ids][25]; // array of sensor names
-  uint last_sensor_added_index;
 
-
-  // going to replace the id arrays with custom structs instead
-  //sensor sensors[number_sensor_ids];
+  sensor sensors[number_sensor_ids];
   actor actors[number_actor_ids];
+  uint last_sensor_added_index;
   uint last_actor_added_index; // the index of the last actor added
 
   // takes in the request object whose body is desired, and a pointer to c_string to write the string
@@ -76,11 +71,10 @@ private:
       return;
     }
     actor* actor = FindActor(actor_id);
-    if (actor == NULL) {
+    if (actor == NULL) { // make sure the id exists before sending anything
       Serial.println("Was unable to find matching actor");
       return;
-    } // make sure the id exists before sending anything
-
+    }
 
     // update the actor state
     char c_string_body[50];
@@ -402,7 +396,7 @@ private:
     }
   }
 
-  void UpdateFirstBoot() {
+  void UnsetFirstBoot() {
     // check first byte is set to 128, this indicates this is not the first boot
     EEPROM.write(0,128);
     EEPROM.commit();
@@ -427,6 +421,32 @@ private:
     Serial.println("//end");
   }
 
+  // writes the passed in if
+  void ReadId(char * p_write) {
+    uint offset = (last_actor_added_index * 24) + (last_sensor_added_index * 24) + ids_eeprom_offset;
+
+    // read an entire 24 byte id
+    for(uint j = 0; j < 24;j++) {
+        p_write[j] = (char)EEPROM.read(j+offset);
+    }
+    p_write[24] = 0; // add null character when reading into struct
+    Serial.print("Read from eeprom into sensor_ids: "); Serial.println(p_write);
+  }
+
+  void WriteId(char * p_read) {
+    ShowEeprom();
+    uint offset = (last_actor_added_index * 24) + (last_sensor_added_index * 24) + ids_eeprom_offset;
+
+    // write an entire 24 byte id
+    for(uint j = 0; j < 24;j++) {
+        EEPROM.write(j+offset, p_read[j] );
+    }
+    EEPROM.commit();
+    ShowEeprom();
+  }
+
+
+
   // this should read sensor ID's from internal memory if available, else ask for new ids from the given server
   void LoadIds() {
     // first byte reserved
@@ -434,55 +454,12 @@ private:
 
     // read sensor ids
     for(int i = 0; i< number_sensor_ids;i++) {
-      // read an entire 24 byte id
-      for(int j = 0; j < 24;j++) {
-          sensor_ids[i][j] = (char)EEPROM.read(addr);
-          addr++;
-      }
-      Serial.print("Read from eeprom into sensor_ids: "); Serial.println(sensor_ids[i]);
-    }
-
-    // read actor ids
-    for(int i = 0; i< number_actor_ids;i++) {
-      // read an entire 24 byte id
-      for(int j = 0; j < 24;j++) {
-          actors[i].id[j] = (char)EEPROM.read(addr);
-          addr++;
-      }
-      Serial.print("Read from eeprom into actor_ids: "); Serial.println(actors[i].id);
+      ReadId(sensors[i].id);
+      last_sensor_added_index++;
     }
 
     EEPROM.commit();
     Serial.print("Read bytes: "); Serial.println(addr-ids_eeprom_offset);
-  };
-
-  // this should save sensor ID's to internal memory
-  void SaveIds() {
-    // first byte reserved
-    int addr = ids_eeprom_offset;
-
-    // save sensor ids into eeprom
-    for(int i = 0; i< number_sensor_ids;i++) {
-
-      for(int j = 0; j < 24;j++) {
-          EEPROM.write(addr, sensor_ids[i][j] );
-          addr++;
-      }
-
-    }
-
-    // save actor ids into eeprom
-    for(int i = 0; i< number_actor_ids;i++) {
-
-      for(int j = 0; j < 24;j++) {
-          EEPROM.write(addr, actors[i].id[j] );
-          addr++;
-      }
-
-    }
-
-    EEPROM.commit();
-    Serial.print("Wrote bytes: "); Serial.println(addr-ids_eeprom_offset);
   };
 
   void GetIdFromJson(String json_string, char (*sensor_id)[25]) {
@@ -491,46 +468,6 @@ private:
     const char* id = json_object["id"];
     //strcpy (to,from)
     strcpy (*sensor_id,id);
-  }
-
-  void RegisterSensor(const char* sensor_name,char (*sensor_id)[25]) {
-    if (strlen(sensor_name) > max_node_name_length) {
-      Serial.println("Sensor being registered had a name length over that set by max_node_name_length");
-      return;
-    }
-    // check that we don't already have too many sensors
-    if (last_sensor_added_index > number_sensor_ids) {
-      Serial.println("Sensor being registered was more than the number specified in initialisation.");
-      return;
-    }
-
-    Serial.println("Registering sensor");
-    HTTPClient http;
-
-    // Make a HTTP post
-    http.begin(iothub_server,iothub_port,"/api/sensors");
-
-    // prep the json object
-    StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
-    JsonObject& json_obj = jsonBuffer.createObject();
-    json_obj["name"] = sensor_name;
-
-    http.addHeader("Content-Type","application/json"); // important! JSON conversion in nodejs requires this
-
-    // add the json to a string
-    String json_string;
-    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
-    // then send the json
-    http.POST(json_string);
-
-    // then print the response over Serial
-    Serial.print("Response ID: ");
-    GetIdFromJson(http.getString(),*&sensor_id);
-
-    Serial.print(*sensor_id); Serial.println("///end");
-    //Serial.println( sensor_id );
-
-    http.end();
   }
 
   // test that saved sensors Ids are still registered, TODO: complete
@@ -566,6 +503,36 @@ private:
     GetIdFromJson(http.getString(),&actor_ptr->id);
 
     Serial.print(*actor_ptr->id); Serial.println("///end");
+    //Serial.println( sensor_id );
+
+    http.end();
+  }
+
+  void BaseRegisterSensor(sensor *sensor_ptr){
+    Serial.println("Registering sensor");
+    HTTPClient http;
+
+    // Make a HTTP post
+    http.begin(iothub_server,iothub_port,"/api/sensors");
+
+    // prep the json object
+    StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
+    JsonObject& json_obj = jsonBuffer.createObject();
+    json_obj["name"] = sensor_ptr->name;
+
+    http.addHeader("Content-Type","application/json"); // important! JSON conversion in nodejs requires this
+
+    // add the json to a string
+    String json_string;
+    json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
+    // then send the json
+    http.POST(json_string);
+
+    // then print the response over Serial
+    Serial.print("Response ID: ");
+    GetIdFromJson(http.getString(),&sensor_ptr->id);
+
+    Serial.print(*sensor_ptr->id); Serial.println("///end");
     //Serial.println( sensor_id );
 
     http.end();
@@ -623,7 +590,7 @@ public:
 
       // generate the URL for sensor
       String url = "/api/sensors/";
-      url.concat(sensor_ids[sensor_index]);
+      url.concat(sensors[sensor_index].id);
       url.concat("/data");
       Serial.print("Url: "); Serial.println(url);
       // Make a HTTP post
@@ -659,35 +626,6 @@ public:
       http.end();
   };
 
-  // this should post to /api/sensors with the requested sensor, this will then return an ID that can be used
-void RegisterSensors(const char* sensor_names[]) {
-    ShowEeprom();
-    // if first boot
-    if ( CheckFirstBoot() ) {
-      if(sensor_names[0] == '\0') {
-        Serial.println("Sensor name provided to RegisterSensors empty, the sensor name must not be empty");
-        return;
-      }
-
-      Serial.println("First boot, getting fresh sensor IDs from server");
-      // ClearEeprom
-      ClearEeprom();
-      // register sensors
-      for(uint i=0; i < number_sensor_ids;i++ ) {
-         RegisterSensor(sensor_names[i],&sensor_ids[i]);
-      }
-      // save sensor ids to eeprom
-      SaveIds();
-      // change boot status
-      UpdateFirstBoot();
-    } else {
-      // otherwise load from eeprom
-      Serial.println("Not first boot, loading IDs from eeprom");
-      LoadIds();
-    }
-    ShowEeprom();
-  };
-
   bool ActorValidation(const char* actor_name) {
     // do some validation
     // check actor name not too long
@@ -703,6 +641,19 @@ void RegisterSensors(const char* sensor_names[]) {
     return false;
   }
 
+  bool SensorValidation(const char* sensor_name) {
+    if (strlen(sensor_name) > max_node_name_length) {
+      Serial.println("Sensor being registered had a name length over that set by max_node_name_length");
+      return true;
+    }
+    // check that we don't already have too many sensors
+    if (last_sensor_added_index > number_sensor_ids) {
+      Serial.println("Sensor being registered was more than the number specified in initialisation.");
+      return true;
+    }
+    return false;
+  }
+
   void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
     if (ActorValidation(actor_name)) return;
     Serial.println("Int actor being registered");
@@ -710,7 +661,11 @@ void RegisterSensors(const char* sensor_names[]) {
     new_actor.name = actor_name;
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
-    BaseRegisterActor(&new_actor,"number");
+    if (CheckFirstBoot()) {
+      BaseRegisterActor(&new_actor,"number");
+    } else {
+      ReadId(new_actor.id);
+    }
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++; // increment last actor added
   }
@@ -721,7 +676,11 @@ void RegisterSensors(const char* sensor_names[]) {
     new_actor.name = actor_name;
     new_actor.state_type = actor::is_bool;
     new_actor.on_update.bcallback = function_pointer;
-    BaseRegisterActor(&new_actor,"boolean");
+    if (CheckFirstBoot()) {
+      BaseRegisterActor(&new_actor,"boolean");
+    } else {
+      ReadId(new_actor.id);
+    }
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++; // increment last actor added
   }
@@ -737,6 +696,20 @@ void RegisterSensors(const char* sensor_names[]) {
       actors[i].state.istate = 10;
       actors[i].on_update.icallback = function_pointer;
     }
+  }
+
+
+  void RegisterSensor(const char* sensor_name) {
+    if (SensorValidation(sensor_name)) return;
+    sensor new_sensor;
+    new_sensor.name = sensor_name;
+    if (CheckFirstBoot()) {
+      BaseRegisterSensor(&new_sensor);
+    } else {
+      ReadId(new_sensor.id);
+    }
+    sensors[last_sensor_added_index] = new_sensor;
+    last_sensor_added_index++; // increment last actor added
   }
 
   void Tick() {
