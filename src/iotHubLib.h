@@ -496,7 +496,7 @@ private:
     String json_string;
     json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
     // then send the json
-    http.POST(json_string);
+    int http_code = http.POST(json_string);
 
     // then print the response over Serial
     Serial.print("Response ID: ");
@@ -506,6 +506,10 @@ private:
     //Serial.println( sensor_id );
 
     http.end();
+
+    if (http_code == 200) {
+      WriteId(actor_ptr->id);
+    }
   }
 
   void BaseRegisterSensor(sensor *sensor_ptr){
@@ -526,7 +530,7 @@ private:
     String json_string;
     json_obj.printTo(json_string);// this is great except it seems to be adding quotation marks around what it is sending
     // then send the json
-    http.POST(json_string);
+    int http_code = http.POST(json_string);
 
     // then print the response over Serial
     Serial.print("Response ID: ");
@@ -536,6 +540,10 @@ private:
     //Serial.println( sensor_id );
 
     http.end();
+
+    if (http_code == 200) {
+      WriteId(sensor_ptr->id);
+    }
   }
 
 public:
