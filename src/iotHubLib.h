@@ -385,13 +385,13 @@ private:
   }
 
   bool CheckFirstBoot() {
-    Serial.print("BootByte: "); Serial.println(EEPROM.read(0));
+    //Serial.print("BootByte: "); Serial.println(EEPROM.read(0));
     // check first byte is set to 128, this indicates this is not the first boot
     if ( 128 == EEPROM.read(0) ) {
-      Serial.println("Previous boot detected, loading existing sensor configs");
+      // Previous boot detected
       return false;
     } else {
-      Serial.println("No Previous boot detected");
+      // No Previous boot detected
       return true;
     }
   }
@@ -662,6 +662,17 @@ public:
     return false;
   }
 
+  // this function tests to see if all the specified sensors and actors were registered, if so it unsets the first boot bit
+  void CheckAllRegistered() {
+    if (CheckFirstBoot()) {
+      if (last_actor_added_index == number_actor_ids &&
+      last_sensor_added_index == number_sensor_ids) {
+        Serial.println("All sensors and actors registered, unsetting first boot bit.");
+        UnsetFirstBoot();
+      }
+    }
+  }
+
   void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
     if (ActorValidation(actor_name)) return;
     Serial.println("Int actor being registered");
@@ -670,12 +681,15 @@ public:
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
     if (CheckFirstBoot()) {
+      Serial.println("First boot, registering");
       BaseRegisterActor(&new_actor,"number");
     } else {
+      Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_actor.id);
     }
     actors[last_actor_added_index] = new_actor;
-    last_actor_added_index++; // increment last actor added
+    last_actor_added_index++;
+    CheckAllRegistered();
   }
   void RegisterActor(const char* actor_name ,void (*function_pointer)(bool)) {
     if (ActorValidation(actor_name)) return;
@@ -685,12 +699,15 @@ public:
     new_actor.state_type = actor::is_bool;
     new_actor.on_update.bcallback = function_pointer;
     if (CheckFirstBoot()) {
+      Serial.println("First boot, registering");
       BaseRegisterActor(&new_actor,"boolean");
     } else {
+      Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_actor.id);
     }
     actors[last_actor_added_index] = new_actor;
-    last_actor_added_index++; // increment last actor added
+    last_actor_added_index++;
+    CheckAllRegistered();
   }
 
   void AddDummyActors(void (*function_pointer)(int)) {
@@ -712,8 +729,10 @@ public:
     sensor new_sensor;
     new_sensor.name = sensor_name;
     if (CheckFirstBoot()) {
+      Serial.println("First boot, registering");
       BaseRegisterSensor(&new_sensor);
     } else {
+      Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_sensor.id);
     }
     sensors[last_sensor_added_index] = new_sensor;
