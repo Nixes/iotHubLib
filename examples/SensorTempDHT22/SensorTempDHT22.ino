@@ -15,8 +15,8 @@ void setup() {
   iothub.Start();
 
   // add sensors
-  const char *names[] = {"Temperature Sensor 1","Temperature Sensor 2"};
-  iothub.RegisterSensors(names);
+  iothub.RegisterSensor("Temperature Sensor 1");
+  iothub.RegisterSensor("Temperature Sensor 2");
 }
 
 void loop() {
