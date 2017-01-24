@@ -221,8 +221,8 @@ private:
       if (id_digit == 24 && !non_match_found) {
         return &actors[i];
       }
-      return NULL;
     }
+    return NULL;
   }
 
   void GetActorHandler(Request &req, Response &res, char* actor_id, uint actor_id_length) {
