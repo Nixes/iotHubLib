@@ -688,24 +688,40 @@ void RegisterSensors(const char* sensor_names[]) {
     ShowEeprom();
   };
 
-  void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
+  bool ActorValidation(const char* actor_name) {
     // do some validation
     // check actor name not too long
     if (strlen(actor_name) > max_node_name_length) {
       Serial.println("Actor being registered had a name length over that set by max_node_name_length");
-      return;
+      return true;
     }
     // check that we don't already have too many actors
     if (last_actor_added_index > number_actor_ids) {
       Serial.println("Actor being registered was more than the number specified in initialisation.");
-      return;
+      return true;
     }
+    return false;
+  }
 
+  void RegisterActor(const char* actor_name ,void (*function_pointer)(int)) {
+    if (ActorValidation(actor_name)) return;
+    Serial.println("Int actor being registered");
     actor new_actor;
     new_actor.name = actor_name;
     new_actor.state_type = actor::is_int;
     new_actor.on_update.icallback = function_pointer;
     BaseRegisterActor(&new_actor,"number");
+    actors[last_actor_added_index] = new_actor;
+    last_actor_added_index++; // increment last actor added
+  }
+  void RegisterActor(const char* actor_name ,void (*function_pointer)(bool)) {
+    if (ActorValidation(actor_name)) return;
+    Serial.println("Bool actor being registered");
+    actor new_actor;
+    new_actor.name = actor_name;
+    new_actor.state_type = actor::is_bool;
+    new_actor.on_update.bcallback = function_pointer;
+    BaseRegisterActor(&new_actor,"boolean");
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++; // increment last actor added
   }
