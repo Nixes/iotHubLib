@@ -10,4 +10,4 @@ Stable releases are found under releases.
 - ArduinoJson
 
 #Example
-The iotHub_lib.ino sketch contains a simple example with lots of comments :)
+The /examples folder contains some simple heavily commented examples of usage including both sensors and actors
