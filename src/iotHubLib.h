@@ -13,6 +13,7 @@
 struct sensor {
   char id[25]; // ids are 24 alphanumeric keys long, the extra char is for the null character
   const char* name; // sensor name limited to 99 characters
+  enum {is_int, is_float, is_bool, is_string} data_type;
 };
 struct actor {
   char id[25]; // ids are 24 alphanumeric keys long, the extra char is for the null character
@@ -512,7 +513,7 @@ private:
     }
   }
 
-  void BaseRegisterSensor(sensor *sensor_ptr){
+  void BaseRegisterSensor(sensor *sensor_ptr, const char* data_type){
     Serial.println("Registering sensor");
     HTTPClient http;
 
@@ -523,6 +524,7 @@ private:
     StaticJsonBuffer<max_node_name_length+10> jsonBuffer;
     JsonObject& json_obj = jsonBuffer.createObject();
     json_obj["name"] = sensor_ptr->name;
+    json_obj["data_type"] = data_type;
 
     http.addHeader("Content-Type","application/json"); // important! JSON conversion in nodejs requires this
 
@@ -724,13 +726,13 @@ public:
   }
 
 
-  void RegisterSensor(const char* sensor_name) {
+  void RegisterSensor(const char* sensor_name, const char* data_type) {
     if (SensorValidation(sensor_name)) return;
     sensor new_sensor;
     new_sensor.name = sensor_name;
     if (CheckFirstBoot()) {
       Serial.println("First boot, registering");
-      BaseRegisterSensor(&new_sensor);
+      BaseRegisterSensor(&new_sensor,data_type);
     } else {
       Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_sensor.id);

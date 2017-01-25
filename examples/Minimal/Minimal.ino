@@ -8,7 +8,7 @@ iotHubLib<1,0> iothub("linserver",3000); // note lack of http:// prefix, do not 
 
 void setup() {
   iothub.Start();
-  iothub.RegisterSensor("Minimal Example Test Sensor");
+  iothub.RegisterSensor("Minimal Example Test Sensor","number"); // name and data_type of sensor
 }
 
 void loop() {

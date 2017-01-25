@@ -15,8 +15,8 @@ void setup() {
   iothub.Start();
 
   // add sensors
-  iothub.RegisterSensor("Temperature Sensor 1");
-  iothub.RegisterSensor("Temperature Sensor 2");
+  iothub.RegisterSensor("Temperature Sensor 1","number");
+  iothub.RegisterSensor("Temperature Sensor 2","number");
 }
 
 void loop() {
