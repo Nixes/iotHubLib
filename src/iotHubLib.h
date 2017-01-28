@@ -408,6 +408,11 @@ private:
     EEPROM.commit();
   }
 
+  void SetFirstBootRestart() {
+    SetFirstBoot();
+    ESP.restart();
+  }
+
   void ShowEeprom() {
     // first byte reserved
     Serial.println();
@@ -471,11 +476,22 @@ private:
     strcpy (*sensor_id,id);
   }
 
-  // test that saved sensors Ids are still registered, TODO: complete
-  void CheckRegistered() {
+  bool CheckActorRegistered(char * actor_id) {
     HTTPClient http;
-    http.begin(iothub_server,iothub_port,"/api/sensors/");
+
+    String url = "/api/actors/";
+    url.concat(actor_id);
+
+    http.begin(iothub_server,iothub_port,url);
+    int http_code = http.GET();
     http.end();
+
+    // actor was found
+    if (http_code == 200) {
+      return true;
+    }
+    // if it wasn't then it does not exist
+    return false;
   }
 
   void BaseRegisterActor(actor *actor_ptr,char * state_type) {
@@ -626,11 +642,10 @@ public:
       Serial.print("HTTP Code: "); Serial.println(http_code);Serial.println();
 
       if (http_code == 404) {
-        // set first boot so that sensors can be registered on next boot
-        SetFirstBoot();
-        // restart and re-register sensors
         Serial.println("Sensor 404'd restarting");
-        ESP.restart();
+        // set first boot so that sensors can be registered on next boot
+        // restart and re-register sensors
+        SetFirstBootRestart();
       }
 
       http.end();
@@ -688,6 +703,11 @@ public:
     } else {
       Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_actor.id);
+      // if previously stored actor is not registered then set as first boot
+      if (!CheckActorRegistered(new_actor.id)) {
+        Serial.println("Actor loaded from memory has expired, reobtaining ids");
+        SetFirstBootRestart();
+      }
     }
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++;
@@ -706,6 +726,11 @@ public:
     } else {
       Serial.println("Not first boot, loading ids from eeprom");
       ReadId(new_actor.id);
+      // if previously stored actor is not registered then set as first boot
+      if (!CheckActorRegistered(new_actor.id)) {
+        Serial.println("Actor loaded from memory has expired, reobtaining ids");
+        SetFirstBootRestart();
+      }
     }
     actors[last_actor_added_index] = new_actor;
     last_actor_added_index++;
