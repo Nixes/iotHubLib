@@ -44,6 +44,8 @@ private:
   uint sleep_interval = 30000; // default of 30 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
 
+  boolean first_boot_bit; // memory location for ids start +1, skipping zero
+
   sensor sensors[number_sensor_ids];
   actor actors[number_actor_ids];
   uint last_sensor_added_index;
@@ -390,22 +392,34 @@ private:
     // check first byte is set to 128, this indicates this is not the first boot
     if ( 128 == EEPROM.read(0) ) {
       // Previous boot detected
+      first_boot_bit = false;
       return false;
     } else {
       // No Previous boot detected
+      first_boot_bit = true;
       return true;
     }
   }
 
   void UnsetFirstBoot() {
-    // check first byte is set to 128, this indicates this is not the first boot
-    EEPROM.write(0,128);
-    EEPROM.commit();
+    if (first_boot_bit == true) {
+      // check first byte is set to 128, this indicates this is not the first boot
+      EEPROM.write(0,128);
+      EEPROM.commit();
+      first_boot_bit = false;
+    } else {
+      Serial.println("No change in unset boot bit");
+    }
   }
 
   void SetFirstBoot() {
-    EEPROM.write(0,0);
-    EEPROM.commit();
+    if (first_boot_bit == false) {
+      EEPROM.write(0,0);
+      EEPROM.commit();
+      first_boot_bit = true;
+    } else {
+      Serial.println("No change in set boot bit");
+    }
   }
 
   void SetFirstBootRestart() {
