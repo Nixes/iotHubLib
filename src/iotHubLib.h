@@ -622,6 +622,12 @@ public:
 
 
   void Send(uint sensor_index,float sensor_value) {
+      // make sure the sensor value is not something crazy
+      if (!isnormal(sensor_value)) {
+        Serial.println("Sensor was abnormal (infinity, NaN, zero or subnormal) no data sent.");
+        return;
+      };
+
       Serial.print("Sensor "); Serial.print(sensor_index); Serial.print(" value "); Serial.println(sensor_value);
 
       HTTPClient http;
