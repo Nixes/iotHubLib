@@ -782,6 +782,7 @@ public:
     }
     sensors[last_sensor_added_index] = new_sensor;
     last_sensor_added_index++; // increment last actor added
+    CheckAllRegistered();
   }
 
   void Tick() {
