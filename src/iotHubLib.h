@@ -41,7 +41,7 @@ private:
   WiFiServer server{80}; // the server that accepts requests from the hub, note the () initialisation syntax in not supported in class bodies
   WebApp app; // the class used by aWOT
 
-  uint sleep_interval = 30000; // default of 30 seconds
+  uint sleep_interval = 120000; // default of 120 seconds
   const int ids_eeprom_offset = 1; // memory location for ids start +1, skipping zero
 
   boolean first_boot_bit; // memory location for ids start +1, skipping zero
@@ -441,7 +441,7 @@ private:
     Serial.println("//end");
   }
 
-  // writes the passed in if
+  // writes the passed in id to a location in memory, it assumes either last_actor_added_index or last_sensor_added_index will be incremented afterwards
   void ReadId(char * p_write) {
     uint offset = (last_actor_added_index * 24) + (last_sensor_added_index * 24) + ids_eeprom_offset;
 
@@ -464,8 +464,6 @@ private:
     EEPROM.commit();
     ShowEeprom();
   }
-
-
 
   // this should read sensor ID's from internal memory if available, else ask for new ids from the given server
   void LoadIds() {
